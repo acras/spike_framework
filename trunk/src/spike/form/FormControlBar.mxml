@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:ControlBar
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    width="100%">
+
+  <mx:Script>
+    <![CDATA[
+      [Bindable]
+      public var save:Function;
+      [Bindable]
+      public var saveAndContinue:Function;
+      [Bindable]
+      public var close:Function;
+    ]]>
+  </mx:Script>
+
+  <mx:Button id="saveButton" label="Salvar" click="save()"/>
+  <mx:Button id="saveAndContinueButton" label="Salvar e continuar" click="saveAndContinue()" visible="false" includeInLayout="false"/>
+  <mx:Button id="cancelButton" label="Cancelar" click="close()"/>
+</mx:ControlBar>

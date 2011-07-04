@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DocumentoInput
+    xmlns="spike.core.*"
+    xmlns:mx="http://www.adobe.com/2006/mxml">
+
+  <mx:Script>
+    <![CDATA[
+      protected override function setTextInputsIndexes():void {
+        textInputsIndexes = [0, 2, 4, 6];
+      }
+    ]]>
+  </mx:Script>
+
+  <mx:TextInput restrict="0-9" maxChars="3"
+      x="0" y="0" width="35"
+      change="onFieldChange(event)" />
+  <mx:Text text="." x="35" y="0" />
+  <mx:TextInput restrict="0-9" maxChars="3"
+      x="43" y="0" width="35"
+      change="onFieldChange(event)" />
+  <mx:Text text="."  x="78" y="0" />
+  <mx:TextInput restrict="0-9" maxChars="3"
+      x="86" y="0" width="35"
+      change="onFieldChange(event)" />
+  <mx:Text text="-" x="121" y="0" />
+  <mx:TextInput restrict="0-9" maxChars="2"
+      x="130" y="0" width="30"
+      change="onFieldChange(event)" />
+</DocumentoInput>

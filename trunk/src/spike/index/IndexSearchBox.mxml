@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    defaultButton="{buttonSearch}"
+    creationComplete="init()"
+    verticalAlign="bottom">
+
+  <mx:Script>
+    <![CDATA[
+      import mx.core.Container;
+      import mx.core.UIComponent;
+      import mx.controls.Button;
+
+      [Bindable]
+      public var index:Function;
+      [Bindable]
+      public var buttonLabel:String = 'Procurar';
+      [Bindable]
+      public var setFocusOn:UIComponent;
+
+      private function init():void {
+        setarFoco();
+      }
+
+      protected function setarFoco():void {
+        if (setFocusOn)
+          setFocusOn.setFocus();
+        else {
+          var firstChild:UIComponent = getChildren()[0];
+          while (firstChild && firstChild is Container)
+            firstChild = Container(firstChild).getChildren()[0];
+          if (firstChild)
+            firstChild.setFocus();
+        }
+      }
+    ]]>
+  </mx:Script>
+
+  <mx:Button id="buttonSearch" label="{buttonLabel}" click="index()" />
+</mx:HBox>

@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8"?>
+<hc:CloseableTitleWindow
+  xmlns:hc="com.hillelcoren.components.*"
+  xmlns:mx="http://www.adobe.com/2006/mxml"
+  xmlns:classes="com.hillelcoren.components.autoComplete.classes.*"
+  implements="spike.core.ISpikeAutoCompleteBrowser"
+  layout="absolute" width="600" height="350"
+  show="onShow()"
+  showCloseButton="false">
+
+  <mx:Metadata>
+    [Event(name="change", type="flash.events.Event")]
+  </mx:Metadata>
+
+  <mx:Script>
+    <![CDATA[
+      import org.restfulx.collections.RxCollection;
+      import org.restfulx.Rx;
+      import mx.events.CloseEvent;
+      import mx.controls.List;
+      import mx.events.ListEvent;
+      import mx.collections.ListCollectionView;
+      import mx.controls.listClasses.ListBase;
+
+      [Bindable]
+      private var _dataProvider:ListCollectionView;
+      private var _dataProviderChanged:Boolean;
+
+      [Bindable]
+      private var _originalSelectedItems:Array;
+      
+      [Bindable]
+      public var _searchAdditionalParams: Object = null;
+
+      private var _browserFields:Array;
+
+      private var _searchStr:String;
+      private var _searchStrChanged:Boolean;
+
+      private var _filterFunction:Function;
+      private var _labelFunction:Function;
+      private var _itemRenderer:IFactory;
+
+      [Bindable]
+      protected var _list:ListBase;
+
+      protected var results:RxCollection = new RxCollection();
+
+      protected var _resource:Class;
+
+      protected var _searchCategory:String = "";
+
+      protected var _searchFieldsDescription:String = "";
+
+      public function set resource(value:Class):void {
+        _resource = value;
+      }
+
+      public function set searchCategory(value:String):void {
+        _searchCategory = value;
+      }
+
+      public function set searchAdditionalParams(value:Object):void {
+        _searchAdditionalParams = value;
+      }
+
+      public function set searchFieldsDescription(value:String):void {
+        _searchFieldsDescription = value;
+      }
+
+      protected function handleSearchClick():void {
+        results = new RxCollection();
+        var searchMetadata:Object = { search: searchTextInput.text, category: _searchCategory }
+        for(var i:String in _searchAdditionalParams)
+        {
+          searchMetadata[i] = _searchAdditionalParams[i];
+        }
+        
+        Rx.models.reload(_resource, { onSuccess: onResourceSearch,
+                                      append: true,
+                                      metadata: searchMetadata });
+      }
+
+      protected function onResourceSearch(result:Object):void {
+        if ((result as Array).length)
+          results = new RxCollection(result as Array);
+
+        var dp:ListCollectionView = new ListCollectionView(results.list);
+        dp.sort = _dataProvider.sort;
+        dp.refresh();
+        dataProvider = dp;
+        _list.dataProvider = _dataProvider;
+      }
+
+      public function init():void {
+        setFocus();
+        searchTextInput.toolTip = _searchFieldsDescription;
+      }
+
+      protected function onShow():void {
+        setFocus();
+      }
+
+      override public function setFocus():void {
+        super.setFocus();
+        searchTextInput.setFocus();
+      }
+
+      override protected function createChildren():void {
+        super.createChildren();
+
+        _list = new List();
+        _list.setStyle( "alternatingItemColors", [0xEEEEEE, 0xFFFFFF] );
+
+        _list.percentWidth = 100;
+        _list.percentHeight = 100;
+        _list.dataProvider = _dataProvider;
+        _list.doubleClickEnabled = true;
+        _list.itemRenderer = _itemRenderer ? _itemRenderer : browserItemRenderer;
+        _list.addEventListener(ListEvent.ITEM_DOUBLE_CLICK, handleDoubleClick);
+        _list.addEventListener(KeyboardEvent.KEY_DOWN, handleKeyDown);
+        vBox.addChildAt(_list, 1);
+      }
+
+      public function set filterFunction(value:Function):void {
+        _filterFunction = value;
+      }
+
+      private function handleDoubleClick(event:ListEvent):void {
+        var changeEvent:Event = new Event(Event.CHANGE);
+        dispatchEvent(changeEvent);
+      }
+
+      private function handleKeyDown(event:KeyboardEvent):void {
+        if (_list.selectedIndex > -1 && event.keyCode == Keyboard.ENTER) {
+          var changeEvent:Event = new Event(Event.CHANGE);
+          dispatchEvent(changeEvent);
+        }
+        if (event.keyCode == Keyboard.ESCAPE)
+          dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+      }
+
+      private function onNonListKeyDown(event:KeyboardEvent):void {
+        if (event.keyCode == Keyboard.ESCAPE)
+          dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+      }
+
+      private function handleCancelClick():void {
+        dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+      }
+
+      private function handleSelectClick():void {
+        var changeEvent:Event = new Event(Event.CHANGE);
+        dispatchEvent(changeEvent);
+      }
+
+      public function set selectedItems(value:Array):void {
+        _originalSelectedItems = value;
+      }
+
+      public function set originalSelectedItems(value:Array):void {
+        // do nothing (here to just remove binding warning)
+      }
+
+      public function set itemRenderer(value:IFactory):void {
+        _itemRenderer = value;
+      }
+
+      [Bindable]
+      public function get originalSelectedItems():Array {
+        return _originalSelectedItems;
+      }
+
+      public function get selectedItems():Array {
+        return _list.selectedItems;
+      }
+
+      public function set dataProvider(value:ListCollectionView):void {
+        _dataProvider = value;
+        _dataProviderChanged = true;
+
+        invalidateProperties();
+      }
+
+      public function set labelFunction(value:Function):void {
+        _labelFunction = value;
+      }
+
+      public function set allowMultipleSelection(value:Boolean):void {
+      }
+
+      public function set searchStr(value:String):void {
+        _searchStr = value;
+        _searchStrChanged = true;
+
+        invalidateProperties();
+      }
+
+      public function set browserFields( value:Array ):void {
+        _browserFields = value;
+      }
+
+      override protected function commitProperties():void {
+        super.commitProperties();
+
+        if (_dataProviderChanged) {
+          _dataProviderChanged = false;
+
+          _dataProvider.filterFunction = filterFunctionWrapper;
+          _dataProvider.refresh();
+        }
+
+        if (_searchStrChanged && _dataProvider) {
+          _searchStrChanged = false;
+
+          searchTextInput.text = _searchStr;
+          searchTextInput.setSelection(0, _searchStr.length);
+
+          _dataProvider.refresh();
+        }
+      }
+
+      protected function filterFunctionWrapper(item:Object):Boolean {
+        return _filterFunction(item, searchTextInput.text);
+      }
+
+      private function handleSearchChange():void {
+        _dataProvider.refresh();
+      }
+    ]]>
+  </mx:Script>
+
+  <mx:Component id="browserItemRenderer">
+    <classes:BrowserItemRenderer selectedItems="{ outerDocument.originalSelectedItems }" />
+  </mx:Component>
+
+  <mx:VBox id="vBox" width="100%" height="100%">
+    <mx:HBox width="100%" paddingTop="10" paddingRight="10" paddingLeft="10" paddingBottom="5"
+        keyDown="onNonListKeyDown(event)">
+      <mx:Form defaultButton="{searchButton}"
+          paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+        <mx:FormItem label="Pesquisa">
+          <mx:TextInput id="searchTextInput"
+              width="400" change="handleSearchChange()" />
+        </mx:FormItem>
+      </mx:Form>
+      <mx:Button id="searchButton" label="Pesquisar" click="handleSearchClick()" minWidth="{ Consts.BUTTON_WIDTH }" />
+    </mx:HBox>
+
+    <mx:HBox width="100%" horizontalAlign="center" paddingBottom="5"
+        keyDown="onNonListKeyDown(event)">
+      <mx:Button label="Cancelar" click="handleCancelClick()" minWidth="{ Consts.BUTTON_WIDTH }" />
+      <mx:Button id="selectButton" label="Selecionar" click="handleSelectClick()"
+          enabled="{ _list.selectedIndex > -1 }" minWidth="{ Consts.BUTTON_WIDTH }" />
+    </mx:HBox>
+  </mx:VBox>
+</hc:CloseableTitleWindow>
