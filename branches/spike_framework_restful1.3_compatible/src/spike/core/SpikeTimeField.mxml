@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DocumentoInput
+    xmlns="spike.core.*"
+    xmlns:mx="http://www.adobe.com/2006/mxml">
+
+  <mx:Script>
+    <![CDATA[
+      import mx.controls.TextInput;
+
+      protected var delayFocusTimer:Timer;
+
+      protected override function setTextInputsIndexes():void {
+        textInputsIndexes = [0, 2, 4];
+      }
+
+      public function get value():Date {
+        var hours:Number;
+        var minutes:Number;
+        var seconds:Number;
+
+        if (hoursTextInput.text == '')
+          hours = NaN;
+        else
+          hours = Number(hoursTextInput.text);
+
+        if (minutesTextInput.text == '')
+          minutes = NaN;
+        else
+          minutes = Number(minutesTextInput.text);
+
+        if (secondsTextInput.text == '')
+          seconds = NaN;
+        else
+          seconds = Number(secondsTextInput.text);
+
+        if (!isNaN(hours) && !isNaN(minutes) && !isNaN(seconds))
+          return new Date(null, null, null, hours, minutes, seconds);
+        else
+          return null;
+      }
+
+      public function set value(v:Date):void {
+        if (v != null) {
+          hoursTextInput.text = digitsFormatted(v.hours.toString());
+          minutesTextInput.text = digitsFormatted(v.minutes.toString());
+          secondsTextInput.text = digitsFormatted(v.seconds.toString());
+        } else {
+          hoursTextInput.text = '';
+          minutesTextInput.text = '';
+          secondsTextInput.text = '';
+        }
+      }
+
+      protected function onHoursTextInputChange(event:Event):void {
+        if (hoursTextInput.text != '') {
+          if (minutesTextInput.text == '')
+            minutesTextInput.text = '00';
+    
+          if (secondsTextInput.text == '')
+            secondsTextInput.text = '00';
+        }
+
+        verifyMaximum(TextInput(event.currentTarget), 23);
+
+        onFieldChange(event);
+      }
+
+      protected function onMinutesTextInputChange(event:Event):void {
+        verifyMaximum(TextInput(event.currentTarget), 59);
+
+        onFieldChange(event);
+      }
+
+      protected function onSecondsTextInputChange(event:Event):void {
+        verifyMaximum(TextInput(event.currentTarget), 59);
+
+        onFieldChange(event);
+      }
+
+      protected function onFieldFocusOut(event:FocusEvent):void {
+        formatDigits(TextInput(event.currentTarget));
+
+        delayFocusTimer = new Timer(200, 1);
+        delayFocusTimer.addEventListener(TimerEvent.TIMER, onFocusTimer);
+        delayFocusTimer.start();
+      }
+
+      protected function onFieldFocusIn(event:FocusEvent):void {
+        if (delayFocusTimer != null && delayFocusTimer.running)
+          delayFocusTimer.stop();
+      }
+
+      protected function onFocusTimer(event:TimerEvent):void {
+        ensureDigits();
+      }
+
+      protected function verifyMaximum(textInput:TextInput, maximum:Number):void {
+        var t:String = textInput.text;
+        var i:Number = parseInt(t);
+        if (!isNaN(i)) {
+          if (i > maximum)
+            textInput.text = maximum.toString();
+        }
+      }
+
+      protected function digitsFormatted(s:String):String {
+        if (s.length == 1)
+          return '0' + s;
+        else
+          return s;
+      }
+      
+      protected function formatDigits(ti:TextInput): void {
+        ti.text = digitsFormatted(ti.text);
+      }
+
+      protected function ensureDigits():void {
+        if (hoursTextInput.text != '' ||
+            minutesTextInput.text != '' ||
+            secondsTextInput.text != '') {
+
+          if (hoursTextInput.text == '')
+            hoursTextInput.text = '00';
+
+          if (minutesTextInput.text == '')
+            minutesTextInput.text = '00';
+
+          if (secondsTextInput.text == '')
+            secondsTextInput.text = '00';
+        }
+      }
+    ]]>
+  </mx:Script>
+
+  <mx:TextInput id="hoursTextInput"
+      restrict="0-9" maxChars="2"
+      x="0" y="0" width="30"
+      change="onHoursTextInputChange(event)"
+      focusIn="onFieldFocusIn(event)"
+      focusOut="onFieldFocusOut(event)" />
+  <mx:Text text=":" x="30" y="0" />
+  <mx:TextInput id="minutesTextInput"
+      restrict="0-9" maxChars="2"
+      x="38" y="0" width="30"
+      change="onMinutesTextInputChange(event)"
+      focusIn="onFieldFocusIn(event)"
+      focusOut="onFieldFocusOut(event)" />
+  <mx:Text text=":" x="68" y="0" />
+  <mx:TextInput id="secondsTextInput"
+      restrict="0-9" maxChars="2"
+      x="76" y="0" width="30"
+      change="onSecondsTextInputChange(event)"
+      focusIn="onFieldFocusIn(event)"
+      focusOut="onFieldFocusOut(event)" />
+</DocumentoInput>

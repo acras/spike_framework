@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<core:SpikeComboBox
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:core="spike.core.*"
+    dataProvider="{estados}"
+    initialize="onInitialize(event)">
+
+  <mx:Script>
+    <![CDATA[
+      import mx.collections.ArrayCollection;
+      import mx.events.FlexEvent;
+
+      [Bindable]
+      public var incluirExterior:Boolean = false;
+
+      [Bindable]
+      protected var estados:ArrayCollection = new ArrayCollection(
+        [ { label: "", data: "" },
+          { label: "Acre", data: "AC" },
+          { label: "Alagoas", data: "AL" },
+          { label: "Amapá", data: "AP" },
+          { label: "Amazonas", data: "AM" },
+          { label: "Bahia", data: "BA" },
+          { label: "Ceará", data: "CE" },
+          { label: "Espírito Santo", data: "ES" },
+          { label: "Goiás", data: "GO" },
+          { label: "Maranhão", data: "MA" },
+          { label: "Mato Grosso", data: "MT" },
+          { label: "Mato Grosso do Sul", data: "MS" },
+          { label: "Minas Gerais", data: "MG" },
+          { label: "Pará", data: "PA" },
+          { label: "Paraíba", data: "PB" },
+          { label: "Paraná", data: "PR" },
+          { label: "Pernambuco", data: "PE" },
+          { label: "Piauí", data: "PI" },
+          { label: "Rio de Janeiro", data: "RJ" },
+          { label: "Rio Grande do Norte", data: "RN" },
+          { label: "Rio Grande do Sul", data: "RS" },
+          { label: "Rondônia", data: "RO" },
+          { label: "Roraima", data: "RR" },
+          { label: "Santa Catarina", data: "SC" },
+          { label: "São Paulo", data: "SP" },
+          { label: "Sergipe", data: "SE" },
+          { label: "Tocantins", data: "TO" } ] );
+
+      protected function onInitialize(event:FlexEvent):void {
+        if (incluirExterior)
+          estados.addItem({ label: "Exterior", data: "EX" });
+      }
+    ]]>
+  </mx:Script>
+
+</core:SpikeComboBox>
