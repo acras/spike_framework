@@ -409,6 +409,8 @@
         setFocus();
         this.browserCanceled = false;
         _browser = null;
+        /* evita que a tela do browser fique aparecendo após o TAB */
+        this.searchText = "";
       }
     ]]>
   </mx:Script>
