@@ -128,6 +128,8 @@
             mainPanel.addChild(classGrid(grid));
           }
           addTotalRegistros();
+          grid.doubleClickEnabled = true;
+          grid.addEventListener(MouseEvent.DOUBLE_CLICK, onDoubleClickGrid);
         }
 
         if (footerBox) {
@@ -137,6 +139,10 @@
         if (indexOnCreate)
           index();
       }
+      
+      protected function onDoubleClickGrid(e: Event): void{
+        edit();
+      }      
       
       protected function addTotalRegistros():void {
       	currentState = "adicionaTotalRegistros";
