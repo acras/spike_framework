@@ -30,6 +30,8 @@
 
   <mx:Script>
     <![CDATA[
+      import org.restfulx.utils.TypedArray;
+      import mx.collections.ArrayCollection;
       import mx.binding.utils.BindingUtils;
       import com.hillelcoren.utils.StringUtils;
       import mx.collections.ListCollectionView;
@@ -226,8 +228,8 @@
         searching = false;
         searched = true;
 
-        if ((result as Array).length)
-          results = new RxCollection(result as Array);
+        if ((result as TypedArray).source.length)
+          results = new RxCollection((result as TypedArray).source);
         else
           doSearch = true;
 

@@ -12,6 +12,8 @@
 <applications>
 <application path="spike.as"/>
 </applications>
-<modules/>
+<modules>
+<module application="src/spike.as" destPath="spike/form/SizeableFormModule.swf" optimize="true" sourcePath="src/spike/form/SizeableFormModule.mxml"/>
+</modules>
 <buildCSSFiles/>
 </actionScriptProperties>

@@ -16,6 +16,7 @@
 
   <mx:Script>
     <![CDATA[
+      import org.restfulx.utils.TypedArray;
     	import spike.events.AfterFormCloseEvent;
     	import mx.containers.HDividedBox;
     	import mx.containers.HBox;
@@ -187,8 +188,8 @@
         Rx.models.reload(modelClass, onIndexSuccess, onIndexFailure, null, searchMetadata);
       }
 
-      protected function onIndexSuccess(results:Array):void {
-        records = new ModelsCollection(results);
+      protected function onIndexSuccess(results:TypedArray):void {
+        records = new ModelsCollection(results.source);
         if (grid)
           classGrid(grid).selectedIndex = 0;
       }
