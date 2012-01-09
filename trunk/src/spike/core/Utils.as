@@ -155,5 +155,16 @@ package spike.core {
       } else
         return '';
     }
+    
+    public static function downloadReport(reportPath: String, id: int): void{
+      var path: String = reportPath;
+      if (path.charAt(path.length-1) != '/')
+        path = path + '/';
+      
+      var pdfDownloader: SpikeFileDownloader = new SpikeFileDownloader();
+      pdfDownloader.url = path + id.toString();
+      pdfDownloader.fileName = 'report.pdf';
+      pdfDownloader.download();
+    }
   }
 }

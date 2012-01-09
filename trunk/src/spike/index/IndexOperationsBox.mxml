@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml"
-    creationComplete="onCreationComplete(event)">
+    creationComplete="onCreationComplete(event)" xmlns:core="spike.core.*">
 
   <mx:Script>
     <![CDATA[
+      import org.restfulx.models.RxModel;
       import mx.events.FlexEvent;
       import mx.controls.DataGrid;
       import mx.controls.AdvancedDataGrid;
@@ -29,7 +30,13 @@
       [Bindable]
       public var showDestroy:Boolean = true;
       [Bindable]
+      public var showReport:Boolean = false;
+      [Bindable]
       public var advancedOperationsBox:Container;
+      [Bindable]
+      public var reportPath:String = '';
+      [Bindable]
+      public var reportType:String = '';
 
       protected function onCreationComplete(event:FlexEvent):void {
         if (advancedOperationsBox)
@@ -102,4 +109,11 @@
   <mx:Button id="excluirButton" label="Excluir" click="destroy()"
       visible="{showDestroy}" includeInLayout="{showDestroy}"
       enabled="{canDelete(dataGrid.selectedIndex)}" />
+  <mx:Spacer visible="{showReport}"/>
+  <core:ReportButton id="reportButton" 
+    reportPath="{reportPath}"
+    reportType="{reportType}"
+    recordId="{parseInt(RxModel(dataGrid.selectedItem).id)}"
+    visible="{(reportPath != '') || (reportType != '')}" 
+    includeInLayout="{(reportPath != '') || (reportType != '')}"/>
 </mx:HBox>

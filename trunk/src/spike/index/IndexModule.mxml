@@ -16,6 +16,7 @@
 
   <mx:Script>
     <![CDATA[
+      import spike.form.FormGenerateReport;
     	import spike.events.AfterFormCloseEvent;
     	import mx.containers.HDividedBox;
     	import mx.containers.HBox;
@@ -73,6 +74,10 @@
       public var horizontalBox:HDividedBox;
       [Bindable]
       public var indexOnCloseForm:Boolean = false;
+      [Bindable]
+      public var reportPath:String = '';
+      [Bindable]
+      public var reportType:String = '';
       
       protected function setDataProviderGrid():void {
         if (grid) {
@@ -95,6 +100,8 @@
               IndexOperationsBox(operationsBox).edit = edit;
             if (IndexOperationsBox(operationsBox).destroy == null)
               IndexOperationsBox(operationsBox).destroy = destroy;
+            IndexOperationsBox(operationsBox).reportType = reportType;
+            IndexOperationsBox(operationsBox).reportPath = reportPath;        
           }
           mainPanel.addChild(operationsBox);
         }
@@ -149,9 +156,9 @@
       }
 
       protected function setModuleModel(event:ChildReadyEvent):void {
-        var module:IFormModule = event.child as IFormModule;
-        if (module != null) {
-          if (module is IFormModule) {
+        if (event.child != null) {
+          if (event.child is IFormModule) {
+            var module:IFormModule = event.child as IFormModule;
             IFormModule(module).setModel(modelClass, model);
             if (model.id)
               module.addEventListener(AfterFormUpdateEvent.AFTER_FORM_UPDATE, onUpdateSuccess);
@@ -161,6 +168,8 @@
             module.addEventListener(AfterFormCloseClickEvent.AFTER_FORM_CLOSE_CLICK, onCloseClick);
           }
         }
+        if (event.child is FormGenerateReport)
+          FormGenerateReport(event.child).reportType = reportType;
       }
 
       protected function onClose(event:AfterFormCloseEvent):void {
