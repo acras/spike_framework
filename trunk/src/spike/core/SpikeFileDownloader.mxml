@@ -41,7 +41,7 @@
         if (url != '') {
           var request:URLRequest = new URLRequest(url);
           request.method = URLRequestMethod.GET;
-
+          
           if (bypassToBrowser) {
             navigateToURL(request, "_blank");
           } else {

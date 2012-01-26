@@ -162,7 +162,7 @@ package spike.core {
         path = path + '/';
       
       var pdfDownloader: SpikeFileDownloader = new SpikeFileDownloader();
-      pdfDownloader.url = path + id.toString();
+      pdfDownloader.url = path + '?id=' + id.toString();
       pdfDownloader.fileName = 'report.pdf';
       pdfDownloader.download();
     }
