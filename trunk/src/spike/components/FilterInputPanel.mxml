@@ -30,6 +30,8 @@
         var modelClass: Class = getDefinitionByName('stockfin.models.' + _filterDef.modelClass) as Class;
         var params: Object = new Object();
 
+        params['filter_def_id'] = _filterDef.id.toString();
+
         for (i=0; i<filtersVBox.getChildren().length; i++){
           var renderedFilter: IRenderedFilter = filtersVBox.getChildAt(i) as IRenderedFilter; 
           var fillingValues: Object = renderedFilter.getFillingValues();
