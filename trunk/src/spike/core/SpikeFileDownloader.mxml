@@ -30,6 +30,9 @@
 
       protected var popUpWindow:DisplayObject;
       protected var popUp:IFlexDisplayObject;
+      
+      [Bindable]
+      public var frameName:String = "_blank";
 
       protected function onCreationComplete(event:FlexEvent):void {
         popUpWindow = progressWindow;
@@ -43,7 +46,7 @@
           request.method = URLRequestMethod.GET;
           
           if (bypassToBrowser) {
-            navigateToURL(request, "_blank");
+            navigateToURL(request, frameName);
           } else {
             fileReference = new FileReference();
 

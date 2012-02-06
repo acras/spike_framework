@@ -163,7 +163,8 @@ package spike.core {
       
       var pdfDownloader: SpikeFileDownloader = new SpikeFileDownloader();
       pdfDownloader.url = path + '?id=' + id.toString();
-      pdfDownloader.fileName = 'report.pdf';
+      pdfDownloader.fileName = "report.pdf";
+      pdfDownloader.frameName = "_self";
       pdfDownloader.download();
     }
   }
