@@ -25,9 +25,8 @@
         buildFilterDefPanel(_filterDef);
       }
       
-      public function onClickFind(event: MouseEvent): void{
+      public function getParams(): Object{
         var i: int;
-        var modelClass: Class = getDefinitionByName('stockfin.models.' + _filterDef.modelClass) as Class;
         var params: Object = new Object();
 
         params['filter_def_id'] = _filterDef.id.toString();
@@ -40,8 +39,21 @@
             params['ac_filter_' + id + '_' + p] = fillingValues[p];
           
         }
-        Rx.models.reload(modelClass, null, null, null, params);
-        
+        return params;
+      }
+      
+      public function getParamsAsString(): String{
+        var result: String = "";
+        var p: Object = getParams();
+        for (var tag:String in p) {
+          result += tag + "=" + encodeURI(p[tag]) + "&";
+        }
+        return result;
+      }
+      
+      public function onClickFind(event: MouseEvent): void{
+        var modelClass: Class = getDefinitionByName('stockfin.models.' + _filterDef.modelClass) as Class;
+        Rx.models.reload(modelClass, null, null, null, getParams());
       }
       
       protected function buildFilterDefPanel(filterDef: AcFilterDef): void{

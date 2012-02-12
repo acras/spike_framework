@@ -5,6 +5,9 @@
 
   <mx:Script>
     <![CDATA[
+      import org.restfulx.services.http.XMLHTTPServiceProvider;
+      import org.restfulx.serializers.GenericSerializer;
+      import org.restfulx.controllers.SerializersController;
       import mx.controls.Alert;
       import mx.core.Application;
       import mx.core.IFlexDisplayObject;
@@ -43,8 +46,8 @@
       public function download():void {
         if (url != '') {
           var request:URLRequest = new URLRequest(url);
+          request.data = data;
           request.method = URLRequestMethod.GET;
-          
           if (bypassToBrowser) {
             navigateToURL(request, frameName);
           } else {

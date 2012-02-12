@@ -2,6 +2,7 @@
 <flexLibProperties version="1">
 <includeClasses>
 <classEntry path="spike.formatters.DataBRFormatter"/>
+<classEntry path="spike.components.PrintReportPanel"/>
 <classEntry path="spike.form.FormGenerateReport"/>
 <classEntry path="spike.models.ReportTemplate"/>
 <classEntry path="spike.core.SpikeVBox"/>
@@ -34,6 +35,7 @@
 <classEntry path="spike.models.AcFilterOption"/>
 <classEntry path="spike.core.SpikeComboBox"/>
 <classEntry path="spike.core.Utils"/>
+<classEntry path="spike.form.FormTestReport"/>
 <classEntry path="spike.core.IConv"/>
 <classEntry path="spike.core.TelefoneInput"/>
 <classEntry path="spike.core.SpikeHelpTip"/>

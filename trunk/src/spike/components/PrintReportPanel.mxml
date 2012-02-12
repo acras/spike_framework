@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FilterInputPanel xmlns="spike.components.*" xmlns:mx="http://www.adobe.com/2006/mxml">
+  <mx:Script>
+    <![CDATA[
+      import spike.core.SpikeFileDownloader;
+      import spike.models.AcFilterDef;
+      import spike.models.ReportTemplate;
+      public var _report: ReportTemplate;
+
+      public function set report(value: ReportTemplate): void{
+        _report = value;
+        filterDef = _report.acFilterDef;
+      }
+      
+      override public function onClickFind(event: MouseEvent): void{
+        var pdfDownloader: SpikeFileDownloader = new SpikeFileDownloader();
+        pdfDownloader.url = '/generate_report/';
+        pdfDownloader.fileName = 'report.pdf';
+        pdfDownloader.data = 'report_template_id=' + _report.id.toString() + '&' + getParamsAsString();
+        pdfDownloader.download();
+      }
+
+    ]]>
+  </mx:Script>
+</FilterInputPanel>
