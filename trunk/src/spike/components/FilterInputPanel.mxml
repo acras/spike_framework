@@ -35,8 +35,10 @@
           var renderedFilter: IRenderedFilter = filtersVBox.getChildAt(i) as IRenderedFilter; 
           var fillingValues: Object = renderedFilter.getFillingValues();
           var id: String = renderedFilter.filter.id.toString();
-          for (var p:String in fillingValues)
-            params['ac_filter_' + id + '_' + p] = fillingValues[p];
+          params['ac_filter_' + id + '_is_filled'] = renderedFilter.isFilled();
+          if (renderedFilter.isFilled())
+            for (var p:String in fillingValues)
+              params['ac_filter_' + id + '_' + p] = fillingValues[p];
           
         }
         return params;
@@ -73,6 +75,8 @@
           buildAutocompleteFilter(filter);
         if (filter.dataType == 'checkbox')
           buildCheckboxFilter(filter);
+        if (filter.dataType == 'options')
+          buildOptionsFilter(filter);
       }
       
       protected function buildTextFilter(filter: AcFilter): void{
@@ -95,6 +99,12 @@
 
       protected function buildCheckboxFilter(filter: AcFilter): void{
         var f: FilterCheckboxInput = new FilterCheckboxInput();
+        f.filter = filter;
+        filtersVBox.addChild(f);
+      }
+
+      protected function buildOptionsFilter(filter: AcFilter): void{
+        var f: FilterOptionsInput = new FilterOptionsInput();
         f.filter = filter;
         filtersVBox.addChild(f);
       }

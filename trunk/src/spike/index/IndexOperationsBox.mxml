@@ -78,6 +78,19 @@
         }
         return can;
       }
+
+      protected function canPrint(selectedIndex:int):Boolean {
+        var can:Boolean = false;
+        can = selectedIndex >= 0;
+        if (can) {
+          if(advancedDataGrid) {
+            can = (advancedDataGrid.selectedItem is modelClass);
+          } else {
+            can = (dataGrid.selectedItem is modelClass);
+          }
+        }
+        return can;
+      }
     ]]>
   </mx:Script>
 
@@ -114,6 +127,7 @@
     reportPath="{reportPath}"
     reportType="{reportType}"
     recordId="{parseInt(RxModel(dataGrid.selectedItem).id)}"
+    enabled="{((reportPath != '') || (reportType != '')) && (canPrint(dataGrid.selectedIndex))}"
     visible="{(reportPath != '') || (reportType != '')}" 
     includeInLayout="{(reportPath != '') || (reportType != '')}"/>
 </mx:HBox>
