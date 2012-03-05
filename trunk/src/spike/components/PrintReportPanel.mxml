@@ -14,7 +14,12 @@
       
       override public function onClickFind(event: MouseEvent): void{
         var pdfDownloader: SpikeFileDownloader = new SpikeFileDownloader();
-        pdfDownloader.url = '/generate_report/';
+        
+        if (_report.controllerName.toString() != '')        
+          pdfDownloader.url = '/' + _report.controllerName + '/';
+        else
+          pdfDownloader.url = '/generate_report/';
+          
         pdfDownloader.fileName = 'report.pdf';
         pdfDownloader.data = 'report_template_id=' + _report.id.toString() + '&' + getParamsAsString();
         pdfDownloader.download();

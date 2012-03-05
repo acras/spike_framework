@@ -4,6 +4,8 @@
   
   <mx:Script>
     <![CDATA[
+      import flash.sampler.NewObjectSample;
+      import mx.formatters.DateFormatter;
       import mx.collections.ArrayCollection;
       import spike.models.AcFilter;
     
@@ -30,7 +32,10 @@
       }
       
       public function getFillingValues(): Object{
-        return {fromDate: initialDateField.selectedDate, toDate: finalDateField.selectedDate};
+        var df: DateFormatter = new DateFormatter();
+        df.formatString = 'YYYY-MM-DD';
+        return {fromDate: df.format(initialDateField.selectedDate), 
+                toDate: df.format(finalDateField.selectedDate)};
       }
     
     

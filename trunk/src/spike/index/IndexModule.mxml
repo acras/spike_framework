@@ -148,7 +148,13 @@
       }
       
       protected function onDoubleClickGrid(e: Event): void{
-        edit();
+        if (operationsBox is IndexOperationsBox){
+          if ((operationsBox as IndexOperationsBox).canEdit(dataGrid.selectedIndex))
+            edit();
+        } else {
+          if (dataGrid.selectedIndex > 0)
+            edit();
+        }
       }      
       
       protected function addTotalRegistros():void {

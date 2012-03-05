@@ -47,7 +47,7 @@
         return true;
       }
 
-      protected function canEdit(selectedIndex:int):Boolean {
+      public function canEdit(selectedIndex:int):Boolean {
         var can:Boolean = false;
         can = selectedIndex >= 0;
         if (can) {
@@ -127,7 +127,7 @@
     reportPath="{reportPath}"
     reportType="{reportType}"
     recordId="{parseInt(RxModel(dataGrid.selectedItem).id)}"
-    enabled="{((reportPath != '') || (reportType != '')) && (canPrint(dataGrid.selectedIndex))}"
+    enabled="{(canPrint(dataGrid.selectedIndex))}"
     visible="{(reportPath != '') || (reportType != '')}" 
     includeInLayout="{(reportPath != '') || (reportType != '')}"/>
 </mx:HBox>
