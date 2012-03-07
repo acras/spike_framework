@@ -5,6 +5,9 @@
 
   <mx:Script>
     <![CDATA[
+      import org.restfulx.services.http.XMLHTTPServiceProvider;
+      import org.restfulx.serializers.GenericSerializer;
+      import org.restfulx.controllers.SerializersController;
       import mx.controls.Alert;
       import mx.core.Application;
       import mx.core.IFlexDisplayObject;
@@ -30,6 +33,9 @@
 
       protected var popUpWindow:DisplayObject;
       protected var popUp:IFlexDisplayObject;
+      
+      [Bindable]
+      public var frameName:String = "_blank";
 
       protected function onCreationComplete(event:FlexEvent):void {
         popUpWindow = progressWindow;
@@ -40,10 +46,10 @@
       public function download():void {
         if (url != '') {
           var request:URLRequest = new URLRequest(url);
+          request.data = data;
           request.method = URLRequestMethod.GET;
-
           if (bypassToBrowser) {
-            navigateToURL(request, "_blank");
+            navigateToURL(request, frameName);
           } else {
             fileReference = new FileReference();
 
