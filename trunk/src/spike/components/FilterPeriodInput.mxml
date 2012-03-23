@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml"
+  implements="spike.components.IRenderedFilter" xmlns:core="spike.core.*">
+  
+  <mx:Script>
+    <![CDATA[
+      import mx.formatters.DateBase;
+      import flash.sampler.NewObjectSample;
+      import mx.formatters.DateFormatter;
+      import mx.collections.ArrayCollection;
+      import spike.models.AcFilter;
+    
+      [Bindable]
+      private var _filter: AcFilter;
+      
+      [Bindable]
+      protected var opcoesPeriodo:ArrayCollection = new ArrayCollection(
+                [ {label:"Hoje", data:"TODAY"}, 
+                  {label:"Esta Semana", data:"THIS_WEEK"}, 
+                  {label:"Mês Atual", data:"THIS_MONTH"},
+                  {label:"Outro Período", data:"OTHER"} ]);
+    
+      public function set filter(value: AcFilter): void{
+        _filter = value;
+      }
+
+      public function get filter(): AcFilter{
+        return _filter;
+      }
+
+      public function isFilled(): Boolean{
+        return ((initialDateField.selectedDate != null) || (finalDateField.selectedDate != null));
+      }
+      
+      public function getFillingValues(): Object{
+        var df: DateFormatter = new DateFormatter();
+        df.formatString = 'YYYY-MM-DD';
+        return {fromDate: df.format(initialDateField.selectedDate), 
+                toDate: df.format(finalDateField.selectedDate)
+                };
+      }
+      
+      public function checkRequired(): Boolean{
+        initialDateField.errorString = '';
+        finalDateField.errorString = '';
+        if ((_filter.required || _filter.requiredFrom) && (initialDateField.selectedDate == null)){
+          initialDateField.errorString = 'Campo obrigatório para este filtro';
+          return false;
+        }         
+        if ((_filter.required || _filter.requiredTo) && (finalDateField.selectedDate == null)){
+          finalDateField.errorString = 'Campo obrigatório para este filtro';
+          return false;
+        }         
+        return true;
+      }
+      
+      protected function onChangeOpcoesPeriodo(event: Event): void{
+        var dt:Date= new Date();
+        var today: Date = new Date(dt.fullYear, dt.month, dt.date, 0, 0, 0, 0);
+        if (opcoesPeriodoComboBox.selectedItem.data == 'TODAY'){
+          initialDateField.selectedDate = today;
+          finalDateField.selectedDate = today;
+        }
+        else if (opcoesPeriodoComboBox.selectedItem.data == 'THIS_WEEK'){
+          var dtIni: Date = new Date();
+          dtIni.date = today.date - today.day
+          initialDateField.selectedDate = dtIni;
+          finalDateField.selectedDate = today;
+        }
+        else if (opcoesPeriodoComboBox.selectedItem.data == 'THIS_MONTH'){
+          var firstDayOfMonth:Date = new Date(dt.fullYear, dt.month, 1);
+          initialDateField.selectedDate = firstDayOfMonth;
+          finalDateField.selectedDate = today;
+        }
+        else if (opcoesPeriodoComboBox.selectedItem.data == 'OTHER'){
+          initialDateField.selectedDate = null;
+          finalDateField.selectedDate = null;
+        }
+ 
+        
+      }
+    
+    
+    ]]>
+  </mx:Script>
+
+  <mx:Label text="{_filter.label}:" />
+  <mx:ComboBox dataProvider="{opcoesPeriodo}" id="opcoesPeriodoComboBox" prompt="Selecione ou preencha ao lado" change="onChangeOpcoesPeriodo(event)" />
+  <mx:FormItem label="de " required="{_filter.required || _filter.requiredFrom}">
+    <core:SpikeDateField id='initialDateField' />
+  </mx:FormItem>
+  <mx:FormItem label=" até " required="{_filter.required || _filter.requiredTo}">
+    <core:SpikeDateField id='finalDateField'/>
+  </mx:FormItem>
+  
+</mx:HBox>

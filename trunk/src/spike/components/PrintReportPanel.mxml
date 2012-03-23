@@ -2,6 +2,7 @@
 <FilterInputPanel xmlns="spike.components.*" xmlns:mx="http://www.adobe.com/2006/mxml">
   <mx:Script>
     <![CDATA[
+      import mx.controls.Alert;
       import spike.core.SpikeFileDownloader;
       import spike.models.AcFilterDef;
       import spike.models.ReportTemplate;
@@ -13,16 +14,20 @@
       }
       
       override public function onClickFind(event: MouseEvent): void{
-        var pdfDownloader: SpikeFileDownloader = new SpikeFileDownloader();
-        
-        if (_report.controllerName.toString() != '')        
-          pdfDownloader.url = '/' + _report.controllerName + '/';
-        else
-          pdfDownloader.url = '/generate_report/';
+        if (checkRequired()){
+          var pdfDownloader: SpikeFileDownloader = new SpikeFileDownloader();
           
-        pdfDownloader.fileName = 'report.pdf';
-        pdfDownloader.data = 'report_template_id=' + _report.id.toString() + '&' + getParamsAsString();
-        pdfDownloader.download();
+          if (_report.controllerName.toString() != '')        
+            pdfDownloader.url = '/' + _report.controllerName + '/';
+          else
+            pdfDownloader.url = '/generate_report/';
+            
+          pdfDownloader.fileName = 'report.pdf';
+          pdfDownloader.data = 'report_template_id=' + _report.id.toString() + '&' + getParamsAsString();
+          pdfDownloader.download();
+        }
+        else
+          Alert.show('Alguns filtros obrigatórios não foram preenchidos');
       }
 
     ]]>

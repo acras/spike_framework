@@ -9,5 +9,6 @@ package spike.components
     
     function isFilled(): Boolean;
     function getFillingValues(): Object;
+    function checkRequired(): Boolean;
   }
 }

@@ -18,9 +18,16 @@
         _filter = value;
         var fo: AcFilterOption;
         for each(fo in _filter.acFilterOptions)
-          opcoes.addItem({label: fo.label, data: fo.value})
-          
+          opcoes.addItem({label: fo.label, data: fo.value})          
       }
+      
+      public function checkRequired(): Boolean{
+        if (!isFilled() && _filter.required){
+          opcaoCombo.errorString = 'Campo obrigatório para este filtro'
+          return false;
+        }
+        return true;   
+      }      
 
       public function get filter(): AcFilter{
         return _filter;
@@ -38,7 +45,8 @@
     ]]>
   </mx:Script>
 
-  <mx:Label text="{_filter.label}:" />
-  <mx:ComboBox id="opcaoCombo" dataProvider="{opcoes}" prompt="Selecione" />
+  <mx:FormItem label="{_filter.label}:"  required="{_filter.required}">
+    <mx:ComboBox id="opcaoCombo" dataProvider="{opcoes}" prompt="Selecione" />
+  </mx:FormItem>
   
 </mx:HBox>

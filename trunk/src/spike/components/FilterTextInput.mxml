@@ -22,6 +22,14 @@
         return userTextInput.text != '';
       }
       
+      public function checkRequired(): Boolean{
+        if (!isFilled() && _filter.required){
+          userTextInput.errorString = 'Campo obrigatório para este filtro'
+          return false;
+        }
+        return true;   
+      }      
+      
       public function getFillingValues(): Object{
         return {'filter_value':userTextInput.text};
       }
@@ -30,7 +38,8 @@
     ]]>
   </mx:Script>
   
-  <mx:Label text="{_filter.label}:" />
-  <mx:TextInput id="userTextInput" />
+  <mx:FormItem label="{_filter.label}:" required="{_filter.required}">
+    <mx:TextInput id="userTextInput" />
+  </mx:FormItem> 
   
 </mx:HBox>

@@ -30,6 +30,14 @@
       public function isFilled(): Boolean{
         return lookupAutoComplete.selectedItem != null;
       }
+
+      public function checkRequired(): Boolean{
+        if (!isFilled() && _filter.required){
+          lookupAutoComplete.errorString = 'Campo obrigatório para este filtro'
+          return false;
+        }
+        return true;   
+      }      
       
       public function getFillingValues(): Object{
         if (lookupAutoComplete.selectedItem)
@@ -39,8 +47,10 @@
     
     ]]>
   </mx:Script>
-    <mx:Label text="{_filter.label}:" />
-    <core1:SpikeAutoComplete id="lookupAutoComplete" width="600" 
-                            lookupMinChars="3" searchFieldsDescription="Nome"
-                            resource="{_targetModel}" searchCategory="{_filter.targetField}" />
+    <mx:FormItem label="{_filter.label}:" required="{_filter.required}">
+      <core1:SpikeAutoComplete id="lookupAutoComplete" width="600" 
+                              lookupMinChars="3" searchFieldsDescription="Nome"
+                              resource="{_targetModel}" searchCategory="{_filter.targetField}" />
+    </mx:FormItem>
+
 </mx:HBox>

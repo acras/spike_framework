@@ -17,6 +17,10 @@
       public function get filter(): AcFilter{
         return _filter;
       }
+      
+      public function checkRequired(): Boolean{
+        return true;
+      }
 
       public function isFilled(): Boolean{
         return userCheckbox.selected;

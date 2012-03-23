@@ -14,6 +14,9 @@ package spike.models
      public var unfilledCriteria:String;
      public var targetModel:String;
      public var targetField:String;
+     public var required: Boolean;
+     public var requiredFrom: Boolean;
+     public var requiredTo: Boolean;
      
      [HasMany]
      public var acFilterOptions: ModelsCollection;

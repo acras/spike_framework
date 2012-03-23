@@ -44,6 +44,18 @@
         return params;
       }
       
+      public function checkRequired(): Object{
+        var i: int;
+        var allFilled: Boolean = true;
+
+        for (i=0; i<filtersVBox.getChildren().length; i++){
+          var renderedFilter: IRenderedFilter = filtersVBox.getChildAt(i) as IRenderedFilter; 
+          allFilled = allFilled && renderedFilter.checkRequired();
+        }
+        return allFilled;
+      }
+      
+      
       public function getParamsAsString(): String{
         var result: String = "";
         var p: Object = getParams();
@@ -54,8 +66,12 @@
       }
       
       public function onClickFind(event: MouseEvent): void{
-        var modelClass: Class = getDefinitionByName('stockfin.models.' + _filterDef.modelClass) as Class;
-        Rx.models.reload(modelClass, null, null, null, getParams());
+        if (checkRequired()){
+          var modelClass: Class = getDefinitionByName('stockfin.models.' + _filterDef.modelClass) as Class;
+          Rx.models.reload(modelClass, null, null, null, getParams());
+        }
+        else
+          Alert.show('Alguns filtros obrigatórios não foram preenchidos');
       }
       
       protected function buildFilterDefPanel(filterDef: AcFilterDef): void{
@@ -71,6 +87,8 @@
           buildTextFilter(filter);
         if (filter.dataType == 'date')
           buildDateFilter(filter);
+        if (filter.dataType == 'period')
+          buildPeriodFilter(filter);
         if (filter.dataType == 'autocomplete')
           buildAutocompleteFilter(filter);
         if (filter.dataType == 'checkbox')
@@ -87,6 +105,12 @@
       
       protected function buildDateFilter(filter: AcFilter): void{
         var f: FilterDateInput = new FilterDateInput();
+        f.filter = filter;
+        filtersVBox.addChild(f);
+      }
+
+      protected function buildPeriodFilter(filter: AcFilter): void{
+        var f: FilterPeriodInput = new FilterPeriodInput();
         f.filter = filter;
         filtersVBox.addChild(f);
       }
