@@ -6,6 +6,7 @@
   
   <mx:Script>
     <![CDATA[
+      import mx.core.Application;
       import org.restfulx.models.RxModel;
       import flash.utils.getDefinitionByName;
       import flash.net.getClassByAlias;
@@ -20,7 +21,8 @@
 
       public function set filter(value: AcFilter): void{
         _filter = value;
-        _targetModel = getDefinitionByName(_filter.targetModel) as Class;
+        /* TODO: pensar numa maneira de deixar isso genérico */
+        _targetModel = getDefinitionByName("sglweb.models."+_filter.targetModel) as Class;
       }
       
       public function get filter(): AcFilter{
