@@ -22,6 +22,7 @@
           else
             pdfDownloader.url = '/generate_report/';
             
+          pdfDownloader.frameName = '_self';
           pdfDownloader.fileName = 'report.pdf';
           pdfDownloader.data = 'report_template_id=' + _report.id.toString() + '&' + getParamsAsString();
           pdfDownloader.download();
