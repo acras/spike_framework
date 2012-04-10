@@ -149,7 +149,7 @@
       
       protected function onDoubleClickGrid(e: Event): void{
         if (operationsBox is IndexOperationsBox){
-          if ((operationsBox as IndexOperationsBox).canEdit(dataGrid.selectedIndex))
+          if ((operationsBox as IndexOperationsBox).canEdit(classGrid(grid).selectedIndex))
             edit();
         } else {
           if (dataGrid.selectedIndex > 0)
