@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Idéias:
+    colunas motradas personalizáveis por usuário
+    filtros mostrados personalizáveis por usuário (filtros texto podem ter um checkbox "exato", datas por período, etc)
+    gerar html, xml, pdf, e excell dos resultados da pesquisa ao click de um botão
+    edição inline na grid: tem q ser possível, é uma mão na roda pro usuário!
+-->
+<mx:Module
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:core="spike.core.*"
+    layout="absolute"
+    height="100%" width="100%"
+    top="0" right="0" bottom="0" left="0"
+    creationComplete="onCreationComplete(event)">
+
+  <mx:Script>
+    <![CDATA[
+      import spike.form.FormGenerateReport;
+    	import spike.events.AfterFormCloseEvent;
+    	import mx.containers.HDividedBox;
+    	import mx.containers.HBox;
+    	import mx.controls.HorizontalList;
+      import mx.binding.utils.BindingUtils;
+      import mx.controls.Alert;
+      import mx.controls.DataGrid;
+      import mx.controls.AdvancedDataGrid;
+      import mx.controls.Label;
+      import mx.core.Container;
+      import mx.events.FlexEvent;
+      import mx.events.CloseEvent;
+      import org.restfulx.Rx;
+      import org.restfulx.collections.ModelsCollection;
+      import org.restfulx.models.RxModel;
+      import org.restfulx.services.XMLServiceErrors;
+      import org.restfulx.utils.RxUtils;
+      import spike.core.Utils;
+      import spike.form.IFormModule;
+      import spike.events.AfterFormCreateEvent;
+      import spike.events.AfterFormUpdateEvent;
+      import spike.events.AfterFormCloseClickEvent;
+      import spike.events.ChildReadyEvent;
+      import mx.core.ScrollControlBase;
+
+      [Bindable]
+      public var modelClass:Class;
+      [Bindable]
+      public var title:String;
+      [Bindable]
+      public var operationsBox:Container;
+      [Bindable]
+      public var searchMetadata:Object;
+      [Bindable]
+      public var searchBox:Container;
+      [Bindable]
+      public var dataGrid:DataGrid;
+      [Bindable]
+      public var advancedDataGrid:AdvancedDataGrid;
+      [Bindable]
+      public var grid:ScrollControlBase;
+      [Bindable]
+      public var classGrid:Class;
+      [Bindable]
+      public var footerBox:Container;
+      [Bindable]
+      public var records:ModelsCollection;
+      [Bindable]
+      public var indexOnCreate:Boolean = false;
+      [Bindable]
+      protected var resource:String;
+      [Bindable]
+      protected var model:Object;
+      [Bindable]
+      public var horizontalBox:HDividedBox;
+      [Bindable]
+      public var indexOnCloseForm:Boolean = false;
+      [Bindable]
+      public var reportPath:String = '';
+      [Bindable]
+      public var reportType:String = '';
+      
+      protected function setDataProviderGrid():void {
+        if (grid) {
+          if (classGrid(grid).dataProvider == null) {
+            BindingUtils.bindProperty(classGrid(grid), 'dataProvider', this, 'records');
+          }
+        }      	
+      }
+
+      protected function onCreationComplete(event:FlexEvent):void {
+        records = new ModelsCollection();
+
+        if (operationsBox) {
+          if (operationsBox is IndexOperationsBox) {
+            if (IndexOperationsBox(operationsBox).modelClass == null)
+              BindingUtils.bindProperty(IndexOperationsBox(operationsBox), 'modelClass', this, 'modelClass');
+            if (IndexOperationsBox(operationsBox).add == null)
+              IndexOperationsBox(operationsBox).add = add;
+            if (IndexOperationsBox(operationsBox).edit == null)
+              IndexOperationsBox(operationsBox).edit = edit;
+            if (IndexOperationsBox(operationsBox).destroy == null)
+              IndexOperationsBox(operationsBox).destroy = destroy;
+            IndexOperationsBox(operationsBox).reportType = reportType;
+            IndexOperationsBox(operationsBox).reportPath = reportPath;        
+          }
+          mainPanel.addChild(operationsBox);
+        }
+
+        if (searchBox) {
+          if (searchBox is IndexSearchBox) {
+            if (IndexSearchBox(searchBox).index == null)
+              IndexSearchBox(searchBox).index = index;
+          }
+          mainPanel.addChild(searchBox);
+        }
+
+        if(dataGrid) {
+          grid = dataGrid;
+          classGrid = DataGrid;        	
+          if (IndexOperationsBox(operationsBox).dataGrid == null)
+            BindingUtils.bindProperty(IndexOperationsBox(operationsBox), 'dataGrid', this, 'dataGrid');
+        } else if(advancedDataGrid) {
+          grid = advancedDataGrid;
+          classGrid = AdvancedDataGrid;                 	
+          if (IndexOperationsBox(operationsBox).advancedDataGrid == null) {
+            BindingUtils.bindProperty(IndexOperationsBox(operationsBox), 'advancedDataGrid', this, 'advancedDataGrid');
+            IndexOperationsBox(operationsBox).currentState = "advancedDataGrid";
+          }
+        }
+        if (grid) {
+          setDataProviderGrid();
+          if(horizontalBox) {
+          	mainPanel.addChild(horizontalBox);
+          } else {
+            mainPanel.addChild(classGrid(grid));
+          }
+          addTotalRegistros();
+          grid.doubleClickEnabled = true;
+          grid.addEventListener(MouseEvent.DOUBLE_CLICK, onDoubleClickGrid);
+        }
+
+        if (footerBox) {
+          mainPanel.addChild(footerBox);
+        }
+
+        if (indexOnCreate)
+          index();
+      }
+      
+      protected function onDoubleClickGrid(e: Event): void{
+        if (operationsBox is IndexOperationsBox){
+          if ((operationsBox as IndexOperationsBox).canEdit(dataGrid.selectedIndex))
+            edit();
+        } else {
+          if (dataGrid.selectedIndex > 0)
+            edit();
+        }
+      }      
+      
+      protected function addTotalRegistros():void {
+      	currentState = "adicionaTotalRegistros";
+      }
+
+      protected function setModuleModel(event:ChildReadyEvent):void {
+        if (event.child != null) {
+          if (event.child is IFormModule) {
+            var module:IFormModule = event.child as IFormModule;
+            IFormModule(module).setModel(modelClass, model);
+            if (model.id)
+              module.addEventListener(AfterFormUpdateEvent.AFTER_FORM_UPDATE, onUpdateSuccess);
+            else
+              module.addEventListener(AfterFormCreateEvent.AFTER_FORM_CREATE, onCreateSuccess);
+            module.addEventListener(AfterFormCloseEvent.AFTER_FORM_CLOSE, onClose);
+            module.addEventListener(AfterFormCloseClickEvent.AFTER_FORM_CLOSE_CLICK, onCloseClick);
+          }
+        }
+        if (event.child is FormGenerateReport)
+          FormGenerateReport(event.child).reportType = reportType;
+      }
+
+      protected function onClose(event:AfterFormCloseEvent):void {
+        model = modelClass(event.model);
+        if(indexOnCloseForm)
+          index();
+      }
+
+
+      protected function onCloseClick(event:AfterFormCloseClickEvent):void {
+        model = modelClass(event.model);
+      }
+
+      protected function onCreateSuccess(event:AfterFormCreateEvent):void {
+        model = modelClass(event.model);
+        if (!records.contains(model) && !indexOnCloseForm)
+          records.addItemAt(model, 0);
+        if (grid)
+          classGrid(grid).selectedItem = model;
+      }
+
+      protected function onUpdateSuccess(event:AfterFormUpdateEvent):void {
+        model = modelClass(event.model);
+        if (grid)
+          classGrid(grid).selectedItem = model;
+      }
+
+      protected function index():void {
+        records = new ModelsCollection();
+        Rx.models.reload(modelClass, onIndexSuccess, onIndexFailure, null, searchMetadata);
+      }
+
+      protected function onIndexSuccess(results:Array):void {
+        records = new ModelsCollection(results);
+        if (grid)
+          classGrid(grid).selectedIndex = 0;
+      }
+
+      protected function onIndexFailure(info:Object):void {
+        var errors:Array = Utils.getErrors(info);
+        Alert.show(errors.join("\n"), 'Erro ao selecionar registros.');
+      }
+
+      protected function getNewResourcePath():String {
+        return '';
+      }
+
+      protected function getEditResourcePath():String {
+        return getNewResourcePath();
+      }
+
+      protected function add():void {
+	      setSelectedIndexNew();
+	      newInstance();
+	      resource = getNewResourcePath();
+	      moduleLoader.loadModule();
+      }
+      
+      protected function setSelectedIndexNew():void {
+        if (grid) {
+          classGrid(grid).selectedIndex = 0;
+        }      	
+      }
+
+      protected function newInstance():void {
+        model = new modelClass();
+      }
+
+      protected function edit():void {
+        if (grid) {
+          if (classGrid(grid).selectedIndex >= 0) {
+            model = modelClass(RxUtils.clone(classGrid(grid).selectedItem, true));
+            resource = getEditResourcePath();
+            moduleLoader.loadModule();
+          }
+        }
+      }
+
+      protected function destroy():void {
+      	Alert.show("Tem certeza?", "Apagar registro", Alert.NO|Alert.YES, this, alertDestroyHandler,null,Alert.NO );
+      }
+
+      protected function onBeforeDestroy():void {
+      	;
+      }
+
+      protected function alertDestroyHandler(evt:CloseEvent):void {
+        if (evt.detail == Alert.YES) { 
+        	onBeforeDestroy();
+	        if (grid) {
+	          if (classGrid(grid).selectedIndex >= 0) {	          	
+	            model = modelClass(classGrid(grid).selectedItem);
+	            model.destroy(onDestroySuccess, onDestroyFailure);
+	          }
+	        }
+        }
+      }
+
+
+      protected function onDestroySuccess(result:RxModel):void {
+        if (records.contains(result))
+          records.removeItem(result);
+        if (grid && (records.length > 0))
+          classGrid(grid).selectedIndex = 0;
+      }
+
+      protected function onDestroyFailure(info:Object):void {
+        var errors:Array = Utils.getErrors(info);
+        Alert.show(errors.join("\n"), 'Erro ao excluir registro.');
+      }
+    ]]>
+  </mx:Script>
+  
+  <mx:states>
+  	<mx:State name="adicionaTotalRegistros">
+  	     <mx:AddChild relativeTo="{mainPanel}" position="lastChild">
+  	         <mx:Label text="{records.length} registro(s) encontrado(s)."/>
+  	     </mx:AddChild>
+  	</mx:State>
+  </mx:states>
+
+  <mx:Panel id="mainPanel"
+      title="{title}"
+      backgroundColor="#EEEEEE"
+      x="0" y="0"
+      height="100%" width="100%"
+      top="0" right="0" bottom="0" left="0"
+      paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5"/>
+
+  <core:SpikeModuleLoader id="moduleLoader"
+      resource="{resource}" childReady="setModuleModel(event)"
+      x="0" y="0"
+      width="100%" height="100%"
+      top="0" right="0" bottom="0" left="0"/>
+
+</mx:Module>

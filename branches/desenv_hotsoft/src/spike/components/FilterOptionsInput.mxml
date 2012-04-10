@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml"
+  implements="spike.components.IRenderedFilter" xmlns:core="spike.core.*">
+  
+  <mx:Script>
+    <![CDATA[
+      import spike.models.AcFilterOption;
+      import mx.collections.ArrayCollection;
+      import spike.models.AcFilter;
+    
+      [Bindable]
+      private var _filter: AcFilter;
+      
+      [Bindable]
+      protected var opcoes:ArrayCollection = new ArrayCollection();
+    
+      public function set filter(value: AcFilter): void{
+        _filter = value;
+        var fo: AcFilterOption;
+        for each(fo in _filter.acFilterOptions)
+          opcoes.addItem({label: fo.label, data: fo.value})          
+      }
+      
+      public function checkRequired(): Boolean{
+        if (!isFilled() && _filter.required){
+          opcaoCombo.errorString = 'Campo obrigatório para este filtro'
+          return false;
+        }
+        return true;   
+      }      
+
+      public function get filter(): AcFilter{
+        return _filter;
+      }
+
+      public function isFilled(): Boolean{
+        return opcaoCombo.value != null;
+      }
+      
+      public function getFillingValues(): Object{
+        return {filter_value:  opcaoCombo.value};
+      }
+    
+    
+    ]]>
+  </mx:Script>
+
+  <mx:FormItem label="{_filter.label}:"  required="{_filter.required}">
+    <mx:ComboBox id="opcaoCombo" dataProvider="{opcoes}" prompt="Selecione" />
+  </mx:FormItem>
+  
+</mx:HBox>

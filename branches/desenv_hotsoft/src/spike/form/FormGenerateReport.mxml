@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow
+  xmlns:mx="http://www.adobe.com/2006/mxml" 
+  title="Impressão de Relatório"
+  backgroundColor="#EEEEEE" 
+  showCloseButton="true" close="closeClick(event)"
+  layout="vertical"
+  horizontalCenter="0" top="5" bottom="5" left="0"
+  height="{Application.application.height - 20}"
+  width="{Application.application.width - 20}"
+  paddingBottom="0" paddingLeft="20" paddingRight="20" paddingTop="20"
+  initialize="onInitialize(event)">
+      
+  <mx:Script>
+    <![CDATA[
+      import spike.models.ReportTemplate;
+      import spike.core.Utils;
+      import org.restfulx.Rx;
+      import mx.controls.Alert;
+      import org.restfulx.collections.ModelsCollection;
+      import mx.managers.PopUpManager;
+      import mx.events.CloseEvent;
+      import mx.core.Application;
+      
+      [Bindable]
+      public var reportType: String;
+      [Bindable]
+      public var recordId: int;
+      [Bindable]
+      protected var availableReports: ModelsCollection;
+      
+      protected function closeClick(event: CloseEvent): void{
+        close();
+      }
+      
+      protected function close():void {
+        PopUpManager.removePopUp(this);
+      }
+      
+      protected function onInitialize(event: Event): void{
+        Rx.models.reload(ReportTemplate, onSelectSuccess, 
+          onSelectFailure, null,
+          { report_type: reportType });      
+      }      
+
+      protected function onSelectSuccess(results:Array):void {
+        availableReports = new ModelsCollection(results);
+      }
+      
+      protected function onSelectFailure(info:Object):void {
+        var errors:Array = Utils.getErrors(info);
+        Alert.show(errors.join("\n"), 'Erro ao selecionar registros.');
+      }      
+      
+      protected function onDoubleClick(event: MouseEvent): void{
+        Utils.downloadReport(ReportTemplate(dataGrid.selectedItem).controllerName, recordId);
+      }
+      
+      
+    ]]>
+  </mx:Script>
+
+
+    <mx:DataGrid id="dataGrid" dataProvider="{availableReports}" 
+      width="100%"
+      doubleClickEnabled="true" 
+      doubleClick="onDoubleClick(event)">
+      <mx:columns>
+        <mx:DataGridColumn dataField="name" headerText="Nome do Relatório"/>        
+      </mx:columns>
+    </mx:DataGrid>
+  
+  </mx:TitleWindow>

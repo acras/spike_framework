@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Module
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    implements="spike.form.IFormModule"
+    layout="absolute"
+    top="0" right="0" bottom="0" left="0"
+    width="100%" height="100%"
+    creationComplete="init()">
+
+  <mx:Metadata>
+    [Event(name="afterFormSave", type="spike.events.AfterFormSaveEvent")]
+    [Event(name="afterFormCreate", type="spike.events.AfterFormCreateEvent")]
+    [Event(name="afterFormUpdate", type="spike.events.AfterFormUpdateEvent")]
+    [Event(name="afterFormClose", type="spike.events.AfterFormCloseEvent")]
+    [Event(name="afterFormCloseClick", type="spike.events.AfterFormCloseClickEvent")]
+  </mx:Metadata>
+
+  <mx:Script>
+    <![CDATA[
+    	import spike.core.SpikeAutoComplete;
+    	import mx.containers.FormItem;
+      import mx.binding.utils.BindingUtils;
+      import mx.containers.ControlBar;
+      import mx.controls.Button;
+      import mx.controls.Text;
+      import mx.core.Application;
+      import mx.core.Container;
+      import mx.core.IFlexDisplayObject;
+      import mx.core.UIComponent;
+      import mx.events.MoveEvent;
+      import mx.managers.PopUpManager;
+      import mx.validators.ValidationResult;
+      import org.restfulx.models.RxModel;
+      import org.restfulx.utils.RxUtils;
+      import spike.core.AutoScroll;
+      import spike.core.SpikeModuleLoader;
+      import spike.core.Utils;
+      import spike.events.AfterFormSaveEvent;
+      import spike.events.AfterFormCreateEvent;
+      import spike.events.AfterFormUpdateEvent;
+      import spike.events.AfterFormCloseClickEvent;
+      import spike.events.AfterFormCloseEvent;
+
+      [Bindable]
+      public var modelClass:Class;
+      [Bindable]
+      public var model:Object;
+      [Bindable]
+      public var windowTitle:String;
+      [Bindable]
+      public var errorContainer:Container;
+      [Bindable]
+      public var formContainer:Container;
+      [Bindable]
+      public var controlContainer:Container;
+      [Bindable]
+      public var setFocusOn:UIComponent;
+
+      [Bindable]
+      public var showSaveAndContinue:Boolean = false;
+      
+      [Bindable]
+      public var showFieldWithErrors:Boolean = false;
+
+      protected var titleWindow:DisplayObject;
+      protected var popUp:IFlexDisplayObject;
+      protected var preventWindowMove:Boolean = false;
+      protected var originalX:Number;
+      protected var originalY:Number;
+
+      [Bindable]
+      public var showBaseErrors:Boolean = false;
+      
+      [Bindable]
+      public var saveRecursive:Boolean = false;
+
+      protected function init():void {
+        if (errorContainer) {
+          if (errorContainer is FormErrorPanel) {
+            BindingUtils.bindProperty(FormErrorPanel(errorContainer), 'showErrors', this, 'showBaseErrors');
+          }
+          contentPanel.addChild(errorContainer);
+        }
+
+        if (formContainer) {
+          contentPanel.addChild(formContainer);
+        }
+
+        if (controlContainer) {
+          if (controlContainer is FormControlBar) {
+            if (FormControlBar(controlContainer).save == null)
+              FormControlBar(controlContainer).save = save;
+            if (FormControlBar(controlContainer).saveAndContinue == null)
+              FormControlBar(controlContainer).saveAndContinue = saveAndContinue;
+            if (FormControlBar(controlContainer).close == null)
+              FormControlBar(controlContainer).close = closeClick;
+          }
+          dummyControlBar.addChild(controlContainer);
+        }
+
+        titleWindow = window;
+        popUp = titleWindow as IFlexDisplayObject;
+
+        removeChild(titleWindow);
+        PopUpManager.addPopUp(popUp, this, true);
+
+        originalX = window.x;
+        originalY = window.y;
+        preventWindowMove = true;
+                
+        toogleControlButtons(true);
+        setarFoco();
+        setarDefaultButton();
+      }
+
+      protected function setarDefaultButton():void {
+        if (controlContainer) {
+          if (controlContainer is FormControlBar) {
+            if(showSaveAndContinue && !(model.id) ) {
+               FormControlBar(controlContainer).saveAndContinueButton.visible = true;
+               FormControlBar(controlContainer).saveAndContinueButton.includeInLayout = true;
+               window.defaultButton = FormControlBar(controlContainer).saveAndContinueButton; 
+            } else {
+               window.defaultButton = FormControlBar(controlContainer).saveButton;
+            }
+          }
+        }      	
+      }
+
+      public function setModel(clazz:Class, object:Object):void {
+        modelClass = clazz;
+        model = modelClass(object);
+
+        if (windowTitle == null || windowTitle == '') {
+          var singularName:String = RxUtils.describeResource(model).arg.(@key == "singularName").@value;
+          if (model.id) {
+            windowTitle = 'Editando ' + singularName;
+          } else {
+            windowTitle = 'Criando ' + singularName;
+          }
+        }
+      }
+
+      protected function setarFoco(withErrors:Boolean = false,blank:Boolean = false):void {
+        if (setFocusOn)
+          setFocusOn.setFocus();
+        else {
+          var firstChild:UIComponent;
+          if(withErrors)
+            firstChild = firstFieldWithErrors(formContainer); 
+          else if(blank)
+            firstChild = firstFieldBlank(formContainer);
+          else
+            firstChild = firstField(formContainer);
+          if (firstChild)
+            firstChild.setFocus();
+        }
+      }
+
+      protected function toogleControlButtons(enable:Boolean):void {
+        (titleWindow as TitleWindow).mx_internal::closeButton.enabled = enable;
+
+        var numChildren:Number = controlContainer.numChildren;
+        controlContainer.getChildren().forEach(function (item:DisplayObject, index:int, array:Array):void {
+          if (item is Button)
+            (item as Button).enabled = enable;
+        });
+      }
+
+      protected function firstField(parent:Container):UIComponent {
+        var firstChild:UIComponent = parent.getChildren()[0];
+        while (firstChild && firstChild is Container)
+          firstChild = Container(firstChild).getChildren()[0];
+        return firstChild;
+      }
+      
+	  public static function firstFieldWithErrors(parent:Container):UIComponent {
+	    var children:Array = parent.getChildren();
+	    var firstChild : UIComponent;
+	    var childLookingFor : UIComponent;
+	    var i:Number;
+	                
+	    for (i = 0; i < children.length;i++) {
+	        if (children[i] is Container) {
+	           childLookingFor = firstFieldWithErrors(Container(children[i]));
+	            if (childLookingFor.errorString.length > 0)
+	                break;
+	        }
+	    }
+	    firstChild = UIComponent(children[0]);
+	    for (i = 0; i < children.length; i++) {
+	        if (UIComponent(children[i]).errorString.length > 0) {
+	            childLookingFor = UIComponent(children[i]);
+	            break;
+	        }
+	    }
+	    if (childLookingFor) 
+	        return childLookingFor;
+	    else
+	        return firstChild;
+	  }      
+
+
+      public static function firstFieldBlank(parent:Container):UIComponent {
+        var children:Array = parent.getChildren();
+        var firstChild : UIComponent;
+        var childLookingFor : UIComponent;
+        var i:Number;
+        var value:*;
+                    
+        for (i = 0; i < children.length;i++) {
+            if ( (children[i] is Container) && !(Utils.validFormComponent(UIComponent(children[i]))) ) {
+               childLookingFor = firstFieldBlank(Container(children[i]));
+                if (Utils.validFormComponent(childLookingFor) && !Utils.getValueFrom(childLookingFor)) 
+                    break;
+            }
+        }
+        firstChild = UIComponent(children[0]);
+        for (i = 0; i < children.length; i++) {
+            if (Utils.validFormComponent(UIComponent(children[i])) && !Utils.getValueFrom(UIComponent(children[i]))) {
+                childLookingFor = UIComponent(children[i]);
+                break;
+            }
+        }
+        if (childLookingFor) 
+            return childLookingFor;
+        else
+            return firstChild;
+      }      
+
+      protected function preventMoving(event:MoveEvent):void {
+        if (preventWindowMove) {
+          event.preventDefault();
+          event.stopPropagation();
+          window.x = originalX;
+          window.y = originalY;
+        }
+      }
+
+      protected function close():void {
+        PopUpManager.removePopUp(popUp);
+        dispatchEvent(new AfterFormCloseEvent(AfterFormCloseEvent.AFTER_FORM_CLOSE, RxModel(model)));        
+      }
+
+
+      protected function closeClick():void {
+        close();
+        dispatchEvent(new AfterFormCloseClickEvent(AfterFormCloseClickEvent.AFTER_FORM_CLOSE_CLICK, RxModel(model)));
+      }
+
+      protected function save():void {
+        doBeforeSave();
+        toogleControlButtons(false);
+        showBaseErrors = false;
+        updateModelProperties();
+        if (model.id) {
+          model.update(onUpdateSuccess, onUpdateFailure,null,null,saveRecursive);
+        } else {
+          model.create(onCreateSuccess, onCreateFailure,null,null,saveRecursive);
+        }
+      }
+
+      protected function saveAndContinue():void {
+        doBeforeSave();
+        toogleControlButtons(false);
+        showBaseErrors = false;
+        updateModelProperties();
+        if (!model.id) {
+          model.create(onCreateAndContinueSuccess, onCreateFailure,null,null,saveRecursive);
+        }
+      }
+      
+      protected function doBeforeSave():void {
+        
+      }
+      
+      protected function updateModelProperties():void {
+        
+      }
+
+      protected function onCreateAndContinueSuccess(result:RxModel):void {
+        model = new modelClass();
+        toogleControlButtons(true);
+        setarFoco();                
+      }
+
+
+      protected function onCreateSuccess(result:RxModel):void {
+        model = result;
+        close();
+        dispatchEvent(new AfterFormCreateEvent(AfterFormCreateEvent.AFTER_FORM_CREATE, result));
+        dispatchEvent(new AfterFormSaveEvent(AfterFormSaveEvent.AFTER_FORM_SAVE, result));
+      }
+
+      protected function onUpdateSuccess(result:RxModel):void {
+        model = result;
+        close();
+        dispatchEvent(new AfterFormUpdateEvent(AfterFormUpdateEvent.AFTER_FORM_UPDATE, result));
+        dispatchEvent(new AfterFormSaveEvent(AfterFormSaveEvent.AFTER_FORM_SAVE, result));
+      }
+
+      protected function onCreateFailure(info:Object):void {
+        toogleControlButtons(true);
+        setarFoco(showFieldWithErrors);
+        setBaseErrors(info);
+        doAfterFailure();
+      }
+
+      protected function onUpdateFailure(info:Object):void {
+        toogleControlButtons(true);
+        setarFoco(showFieldWithErrors);
+        setBaseErrors(info);
+        doAfterFailure();
+      }
+      
+      protected function doAfterFailure():void {
+        
+      }
+
+      protected function setBaseErrors(info:Object):void {
+        var baseErrors:Array = Utils.getErrors(info);
+        if (baseErrors.length > 0) {
+          errorContainer.removeAllChildren();
+          showBaseErrors = true;
+          baseErrors.forEach(function(item:String, index:int, array:Array):void {
+            var t:Text = new Text();
+            t.text = item;
+            errorContainer.addChild(t);
+          });
+        }
+      }
+    ]]>
+  </mx:Script>
+
+  <mx:TitleWindow id="window" title="{windowTitle}"
+      backgroundColor="#EEEEEE" 
+      layout="vertical" move="preventMoving(event)"
+      showCloseButton="true" close="closeClick()"
+      horizontalCenter="0" top="5" bottom="5"
+      height="{Application.application.height - 10}" width="{Application.application.width - 100}"
+      paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+
+    <mx:VBox id="contentPanel"
+        paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5"
+        width="{window.width - 20}" height="{window.height - 100}"
+        verticalScrollPolicy="auto" horizontalScrollPolicy="auto"
+        focusIn="AutoScroll.autoScroll(event)">
+    </mx:VBox>
+
+    <mx:ControlBar id="dummyControlBar" width="100%" />
+  </mx:TitleWindow>
+</mx:Module>

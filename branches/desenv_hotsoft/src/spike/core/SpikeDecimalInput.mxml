@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TextInput xmlns:mx="http://www.adobe.com/2006/mxml"
+    restrict="0-9\.\,"
+    initialize="onInitialize(event)"
+    focusOut="onFocusOut(event)">
+
+  <mx:Script>
+    <![CDATA[
+      import mx.events.FlexEvent;
+
+      [Bindable]
+      public var precision:Number = 2;
+      [Bindable]
+      public var scale:Number = NaN;
+
+      [Bindable]
+      public var permiteSinalNegativo:Boolean = false;
+
+      protected function onInitialize(event:FlexEvent):void {
+        if (isNaN(this.scale))
+          this.scale = 11 + this.precision;
+
+        formatterOut.precision = this.precision;
+        formatterIn.precision = this.precision;
+
+        if(permiteSinalNegativo)
+          restrict = restrict + "\\-";
+      }
+
+      protected function onFocusOut(event:FocusEvent):void {
+        this.text = formattedAndValidated(this.text, formatterOut);
+      }
+
+      public function set value(n:Number):void {
+        var s:String = '';
+        if (!isNaN(n))
+          s = String(n);
+        this.text = formattedAndValidated(s, formatterIn);
+      }
+
+      public function get value():Number {
+        if (this.text != '') {
+          var s:String = this.text.replace(/\./gi, '').replace(',', '.');
+          var n:Number = Number(s);
+          return n;
+        } else
+          return NaN;
+      }
+
+      protected function formattedAndValidated(number:String, formatter:CurrencyFormatter):String {
+        var decimalDigits:int = this.scale - this.precision;
+        var overflowMsg:String = "A parte inteira do número deve ter no máximo " + decimalDigits.toString() + " dígitos";
+        var invalidFormatMsg:String = "O formato do número é inválido";
+
+        this.errorString = this.errorString.replace(overflowMsg, '');
+        this.errorString = this.errorString.replace(invalidFormatMsg, '');
+        this.errorString = this.errorString.replace("\n\n", "\n");
+        this.errorString = this.errorString.replace(/^\n/, "");
+        this.errorString = this.errorString.replace(/\n$/, "");
+
+        var result:String = "";
+
+        if (number != '') {
+          var formatted:String = formatter.format(number);
+          result = formatted;
+
+          if (formatted != '') {
+            var beforeComma:String = '';
+            if (formatted.indexOf(',') > 0) {
+              var numbers:Array = formatted.split(',');
+              beforeComma = numbers[0];
+            } else
+              beforeComma = formatted;
+            beforeComma = beforeComma.replace(/\./g, '');
+
+            if (beforeComma.length > decimalDigits) {
+              if (this.errorString != '')
+                this.errorString += "\n";
+              this.errorString += overflowMsg;
+            }
+          } else {
+            if (this.errorString != '')
+              this.errorString += "\n";
+            this.errorString += invalidFormatMsg;
+          }
+        }
+
+        this.validateNow();
+
+        return result;
+      }
+    ]]>
+  </mx:Script>
+
+  <mx:CurrencyFormatter id="formatterOut"
+      currencySymbol="" decimalSeparatorFrom="," decimalSeparatorTo=","
+      rounding="nearest" thousandsSeparatorFrom="." thousandsSeparatorTo="."
+      useNegativeSign="true" useThousandsSeparator="true" />
+
+  <mx:CurrencyFormatter id="formatterIn"
+      currencySymbol="" decimalSeparatorFrom="." decimalSeparatorTo=","
+      rounding="nearest" thousandsSeparatorFrom="," thousandsSeparatorTo="."
+      useNegativeSign="true" useThousandsSeparator="true" />
+</mx:TextInput>

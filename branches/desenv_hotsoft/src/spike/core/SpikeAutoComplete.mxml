@@ -1,0 +1,417 @@
+<?xml version="1.0" encoding="utf-8"?>
+<hc:AdvancedAutoComplete
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:hc="com.hillelcoren.components.*"
+    actionsMenuDataProvider="{menuData}"
+    allowDuplicates="false"
+    allowEditingNewValues="false"
+    allowNewValues="false"
+    allowMultipleSelection="false"
+    autoSelectEnabled="true"
+    autoSelectFunction="canAutoSelect"
+    backspaceAction="remove"
+    browserClass="{SpikeAutoCompleteBrowser}"
+    browserFields="{recordLabelArray}"
+    change="onChange(event)"
+    creationComplete="onCreationComplete(event)"
+    dataProvider="{results}"
+    dropDownLabelFunction="{dropDownLabel}"
+    enableClearIcon="false"
+    filterFunction="filter"
+    initialize="onInitialize(event)"
+    itemClick="onItemClick(event)"
+    labelField="{recordLabel}"
+    matchType="anyPart"
+    searchChange="onSearchChange(event)"
+    showBrowseButton="false"
+    showRemoveButton="false"
+    showRemoveIcon="false"
+    valueCommit="onValueCommit(event)">
+
+  <mx:Script>
+    <![CDATA[
+      import mx.binding.utils.BindingUtils;
+      import com.hillelcoren.utils.StringUtils;
+      import mx.collections.ListCollectionView;
+      import mx.core.Application;
+      import mx.core.IFlexDisplayObject;
+      import mx.events.CloseEvent;
+      import mx.events.FlexEvent;
+      import mx.events.MenuEvent;
+      import mx.managers.PopUpManager;
+      import mx.controls.ToolTip;
+      import mx.managers.ToolTipManager;
+      import org.restfulx.collections.RxCollection;
+      import org.restfulx.Rx;
+
+      [Bindable]
+      public var resource:Class;
+
+      [Bindable]
+      public var lookupDelay:int = 1000;
+
+      [Bindable]
+      public var lookupMinChars:int = 1;
+      
+      [Bindable]
+      public var searchAdditionalParams: Object = null; 
+
+      [Bindable]
+      public var searchCategory:String = "";
+
+      [Bindable]
+      public var searchFieldsDescription:String = "";
+
+      public var showNewMenu:Boolean = false;
+
+      public var showEditMenu:Boolean = false;
+
+      [Bindable]
+      public var newFunction:Function;
+
+      [Bindable]
+      public var editFunction:Function;
+
+      [Bindable]
+      protected var menuData:XML = new XML('<root></root>');
+
+      [Bindable]
+      protected var results:RxCollection = new RxCollection();
+
+      protected var delayTimer:Timer;
+
+      protected var doSearch:Boolean = true;
+
+      protected var searched:Boolean = false;
+
+      protected var searching:Boolean = false;
+
+      protected var iconv:IConv = new IConv();
+
+      protected var noRecordTip:ToolTip;
+
+      protected var noRecordMessage:String = "Nenhum registro encontrado";
+
+      protected var _browser: ISpikeAutoCompleteBrowser;
+
+      protected var browserCanceled:Boolean = false;
+
+      protected var browserTimer:Timer;
+
+      protected var _browserFields:Array;
+
+      public function get recordLabel():String {
+        if (resource)
+          return resource.LABEL;
+        else
+          return null;
+      }
+
+      public function get recordLabelArray():Array {
+        return [recordLabel];
+      }
+
+      protected function onInitialize(event:FlexEvent):void {
+        var c:String = (this.lookupMinChars == 1 ? " caracter " : " caracteres ");
+        var s:String = "Digite no mínimo " + this.lookupMinChars.toString() + c;
+        if (this.searchFieldsDescription != null && this.searchFieldsDescription != "")
+          s += " (" + this.searchFieldsDescription + ")";
+        this.prompt = s;
+
+        menuData.appendChild('<menuitem data="browse" label="Procurar..." />');
+        if (showNewMenu)
+          menuData.appendChild('<menuitem data="add" label="Novo..." />');
+        if (showEditMenu) {
+          menuData.appendChild('<menuitem data="edit" label="Editar..." />');
+          menuData.menuitem.(@data == "edit").@enabled = false;
+        }
+
+        addEventListener(FocusEvent.FOCUS_OUT, onFocusOut);
+      }
+
+      protected function onCreationComplete(event:FlexEvent):void {
+      	if(inlineButton)
+          inlineButton.addEventListener(MouseEvent.CLICK, onInlineButtonClick);
+      }
+
+      protected function onValueCommit(event:Event):void {
+        if (showEditMenu)
+          menuData.menuitem.(@data == "edit").@enabled = (selectedItem != null);
+        if (selectedItem == null) {
+          this.textInput.clearStyle( "color" );
+          this.textInput.clearStyle( "fontStyle" );
+        }
+      }
+
+      public function get hasFocus():Boolean {
+        return focusManager.focusPane == this.mainGridItem.focusPane;
+      }
+
+      public function clearText():void {
+        this.textInput.text = null;
+        var promptColor:String = this.textInput.getStyle( "promptColor" ) ? this.textInput.getStyle( "promptColor" ) : Consts.COLOR_TEXT_DISABLED;
+        this.textInput.setStyle( "color", promptColor );
+        this.textInput.setStyle( "fontStyle", "italic" );
+      }
+
+      public function clearResults():void {
+        results = new RxCollection();
+      }
+
+      protected function clearNoRecordToolTip():void {
+        if (noRecordTip != null) {
+          ToolTipManager.destroyToolTip(noRecordTip);
+          noRecordTip = null;
+        }
+      }
+
+      protected function onItemClick(event:MenuEvent):void {
+        switch (String(event.item.@data)) {
+          case "browse":
+            this.showBrowser();
+            break;
+          case "add":
+            if (newFunction != null) {
+              if (this.selectedItem == null)
+                this.searchText = "";
+              newFunction();
+            }
+            break;
+          case "edit":
+            if (editFunction != null)
+              editFunction();
+            break;
+        }
+      }
+
+      protected function onChange(event:Event):void {
+        if (this.enabled && this.selectedItem == null) {
+          clearResults();
+          doSearch = true;
+        }
+      }
+
+      protected function onSearchChange(event:Event):void {
+        if (delayTimer != null && delayTimer.running)
+          delayTimer.stop();
+
+        if (doSearch && (this.searchText.length >= this.lookupMinChars)) {
+          clearResults();
+          delayTimer = new Timer(lookupDelay, 1);
+          delayTimer.addEventListener(TimerEvent.TIMER, onTimer);
+          delayTimer.start();
+        }
+
+        if (this.searchText.length < this.lookupMinChars) {
+          doSearch = true;
+          searched = false;
+          clearResults();
+        }
+      }
+
+      protected function onTimer(event:TimerEvent):void {
+        doSearch = false;
+        searching = true;
+        var searchMetadata:Object = { search: searchText, category: searchCategory}
+        for(var i:String in searchAdditionalParams)
+        {
+          searchMetadata[i] = searchAdditionalParams[i];
+        }
+        Rx.models.reload(resource, {  onSuccess: onResourceSearch,
+                                      append: true,
+                                      metadata: searchMetadata } );
+      }
+
+      protected function onResourceSearch(result:Object):void {
+        searching = false;
+        searched = true;
+
+        if ((result as Array).length)
+          results = new RxCollection(result as Array);
+        else
+          doSearch = true;
+
+        if (this.hasFocus || this.results.length == 1)
+          this.search();
+        else
+          this.showBrowser();
+      }
+
+      protected function canAutoSelect(item:Object, aText:String):Boolean {
+        return results.length == 1;
+      }
+
+      protected function filter(item:Object, searchStr:String):Boolean {
+        if (searchStr.length == 0)
+          return true;
+
+        searchStr = iconv.convert(searchStr).replace(/^\s+|\s+$/gi, '');
+        var str:String = iconv.convert(labelFunction(item)).replace(/^\s+|\s+$/gi, '');
+
+        switch (matchType) {
+          case MATCH_ANY_PART:
+            return StringUtils.contains(str, searchStr);
+          case MATCH_BEGINNING:
+            return StringUtils.beginsWith(str, searchStr);
+          case MATCH_WORD:
+            return StringUtils.anyWordBeginsWith(str, searchStr);
+        }
+
+        return false;
+      }
+
+      protected function dropDownLabel(item:Object):String {
+        var string:String = labelFunction(item).replace(/^\s+|\s+$/gi, '');
+        var searchStr:String = searchText.replace(/^\s+|\s+$/gi, '');
+
+        // there are problems using ">"s and "<"s in HTML
+        string = string.replace("<", "&lt;").replace(">", "&gt;");        
+
+        var returnStr:String = highlighMatch(string, searchStr, matchType);
+
+        // disabledItems é private no pai e não tem getter...
+        //if (_selectedItems.getItemIndex(item) >= 0 || _disabledItems.getItemIndex(item) >= 0) {
+        //  returnStr = "<font color='" + Consts.COLOR_TEXT_DISABLED + "'>" + returnStr + "</font>";
+        //}
+
+        return returnStr;
+      }
+
+      protected function highlighMatch(string:String, searchStr:String, matchType:String = ""):String {
+        if (!matchType) {
+          matchType = MATCH_ANY_PART;
+        }
+
+        var regExp:RegExp = new RegExp(iconv.convert(searchStr), "i");
+        var matchPos:int = iconv.convert(string).search(regExp);
+
+        if (matchPos == -1) {
+          return string;
+        }
+
+        // if we're matching on word then we need to make sure
+        // we're highliting the right part (ie, search for "st" in "Test String"
+        // would need to higlight the "st" in String)
+        if (matchType == MATCH_WORD) {
+          if (matchPos > 0 && string.charAt(matchPos - 1) != " ") {
+            regExp = new RegExp(" " + searchStr, "i");
+            matchPos = string.search(regExp) + 1;
+          }
+        }
+
+        var returnStr:String = string.substring(0, matchPos);
+        returnStr += "<b><u>" + string.substr(matchPos, searchStr.length) + "</u></b>";
+        returnStr += string.substr(matchPos + searchStr.length, string.length) + " ";
+
+        return returnStr;
+      }
+
+      override protected function handleKeyDown(event:KeyboardEvent):void {
+        if (event.keyCode != Keyboard.TAB)
+          super.handleKeyDown(event);
+      }
+
+      protected function onFocusOut(event:FocusEvent):void {
+        this.hideDropDown();
+        this.clearNoRecordToolTip();
+        if (this.searchText.length < this.lookupMinChars)
+          this.clearText();
+        else if ( searched && this.searchText != "" && this.selectedItem == null &&
+                  !this.browserCanceled && _browser == null) {
+          cursorManager.setBusyCursor();
+          browserTimer = new Timer(500, 1);
+          browserTimer.addEventListener(TimerEvent.TIMER, onBrowerTimer);
+          browserTimer.start();
+        }
+        if (this.browserCanceled)
+          this.browserCanceled = false;
+      }
+
+      protected function onBrowerTimer(event:TimerEvent):void {
+        this.showBrowser();
+        cursorManager.removeBusyCursor();
+      }
+
+      protected function onInlineButtonClick(event:MouseEvent):void {
+        if (browserTimer != null) {
+          if (browserTimer.running) {
+            browserTimer.stop();
+            cursorManager.removeBusyCursor();
+          }
+        }
+      }
+
+      override public function handleFlowBoxChange(event:Event):void {
+        super.handleFlowBoxChange(event);
+
+        this.clearNoRecordToolTip();
+        if (this.results != null) {
+          if (this.searched && this.results.length == 0 && this.selectedItem == null) {
+             var pt:Point = new Point(this.textInput.textInput.x, this.textInput.textInput.y);
+             pt = this.textInput.textInput.contentToGlobal(pt);
+             this.noRecordTip = ToolTipManager.createToolTip(this.noRecordMessage,
+               pt.x + this.textInput.textInput.width + 5, pt.y - 5, null) as ToolTip;
+             this.noRecordTip.setStyle("styleName", "errorTip");
+          }
+        }
+      }
+
+      override public function showBrowser():void {
+        if (!dataProvider)
+          return;
+
+        _browser = new browserClass();
+        _browser.browserFields = [resource.LABEL];
+
+        var dp:ListCollectionView = new ListCollectionView(dataProvider.list);
+        dp.sort = dataProvider.sort;
+        dp.refresh();
+
+        _browser.title = "Procurar registro";
+        _browser.dataProvider = dp;
+        _browser.filterFunction = browserFilterFunctionWrapper;
+        _browser.labelFunction = labelFunction;
+
+        _browser.resource = this.resource;
+        _browser.searchCategory = this.searchCategory;
+        _browser.searchFieldsDescription = this.searchFieldsDescription;
+        _browser.searchAdditionalParams = this.searchAdditionalParams;
+
+        _browser.addEventListener(Event.CHANGE, onBrowserChange);
+        _browser.addEventListener(CloseEvent.CLOSE, onBrowserClose);
+
+        PopUpManager.addPopUp(IFlexDisplayObject(_browser), DisplayObject(Application.application), true);
+        PopUpManager.centerPopUp(IFlexDisplayObject(_browser));
+
+        _browser.init();
+
+      }
+
+      protected function onBrowserChange(event:Event):void {
+        var item:Object;
+
+        selectedItems.removeAll();
+
+        for each (item in _browser.selectedItems)
+          selectedItems.addItem(item);
+
+        PopUpManager.removePopUp(IFlexDisplayObject(_browser));
+
+        setFocus();
+        dispatchEvent(new Event(Event.CHANGE));
+
+        _browser = null;
+      }
+
+      protected function onBrowserClose(event:CloseEvent):void {
+        this.browserCanceled = true;
+        PopUpManager.removePopUp(IFlexDisplayObject(_browser));
+        setFocus();
+        this.browserCanceled = false;
+        _browser = null;
+        /* evita que a tela do browser fique aparecendo após o TAB */
+        this.searchText = "";
+      }
+    ]]>
+  </mx:Script>
+</hc:AdvancedAutoComplete>

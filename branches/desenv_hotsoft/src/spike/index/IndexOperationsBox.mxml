@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml"
+    creationComplete="onCreationComplete(event)" xmlns:core="spike.core.*">
+
+  <mx:Script>
+    <![CDATA[
+      import org.restfulx.models.RxModel;
+      import mx.events.FlexEvent;
+      import mx.controls.DataGrid;
+      import mx.controls.AdvancedDataGrid;
+      import mx.core.Container;
+      import org.restfulx.utils.RxUtils;
+
+      [Bindable]
+      public var modelClass:Class;
+      [Bindable]
+      public var dataGrid:DataGrid;
+      [Bindable]
+      public var advancedDataGrid:AdvancedDataGrid;
+      [Bindable]
+      public var add:Function;
+      [Bindable]
+      public var edit:Function;
+      [Bindable]
+      public var destroy:Function;
+      [Bindable]
+      public var showAdd:Boolean = true;
+      [Bindable]
+      public var showEdit:Boolean = true;
+      [Bindable]
+      public var showDestroy:Boolean = true;
+      [Bindable]
+      public var showReport:Boolean = false;
+      [Bindable]
+      public var advancedOperationsBox:Container;
+      [Bindable]
+      public var reportPath:String = '';
+      [Bindable]
+      public var reportType:String = '';
+
+      protected function onCreationComplete(event:FlexEvent):void {
+        if (advancedOperationsBox)
+          this.addChild(advancedOperationsBox);
+      }
+
+      protected function canAdd():Boolean {
+        return true;
+      }
+
+      public function canEdit(selectedIndex:int):Boolean {
+        var can:Boolean = false;
+        can = selectedIndex >= 0;
+        if (can) {
+          if(advancedDataGrid) {
+            can = (advancedDataGrid.selectedItem is modelClass);
+          } else {
+            can = (dataGrid.selectedItem is modelClass);
+          }
+        }
+        return can;
+      }
+
+      protected function canDelete(selectedIndex:int):Boolean {
+        var can:Boolean = false;
+        can = selectedIndex >= 0;
+        if (can) {
+          if(advancedDataGrid) {
+          	if(advancedDataGrid.selectedItem is modelClass)
+              can = RxUtils.canDeleteModel(modelClass(advancedDataGrid.selectedItem))
+            else 
+              can = false;
+          } else {
+            if(dataGrid.selectedItem is modelClass)
+              can = RxUtils.canDeleteModel(modelClass(dataGrid.selectedItem))
+            else 
+              can = false;
+          }
+        }
+        return can;
+      }
+
+      protected function canPrint(selectedIndex:int):Boolean {
+        var can:Boolean = false;
+        can = selectedIndex >= 0;
+        if (can) {
+          if(advancedDataGrid) {
+            can = (advancedDataGrid.selectedItem is modelClass);
+          } else {
+            can = (dataGrid.selectedItem is modelClass);
+          }
+        }
+        return can;
+      }
+    ]]>
+  </mx:Script>
+
+  <mx:states>
+    <mx:State name="advancedDataGrid">
+      <mx:RemoveChild target="{editarButton}"/>
+      <mx:RemoveChild target="{excluirButton}"/>
+      <mx:AddChild relativeTo="{this}" position="lastChild">
+        <mx:Button id="editarButtonAdvanced" label="Editar" click="edit()"
+          visible="{showEdit}" includeInLayout="{showEdit}"
+          enabled="{canEdit(advancedDataGrid.selectedIndex)}" />      	
+      </mx:AddChild>
+      <mx:AddChild relativeTo="{this}" position="lastChild">
+        <mx:Button id="excluirButtonAdvanced" label="Excluir" click="destroy()"
+          visible="{showDestroy}" includeInLayout="{showDestroy}"
+          enabled="{canDelete(advancedDataGrid.selectedIndex)}" />      	
+      </mx:AddChild>
+
+    </mx:State>
+  </mx:states>
+
+
+  <mx:Button id="novoButton" label="Novo" click="add()"
+      visible="{showAdd}" includeInLayout="{showAdd}"
+      enabled="{canAdd()}" />
+  <mx:Button id="editarButton" label="Editar" click="edit()"
+      visible="{showEdit}" includeInLayout="{showEdit}"
+      enabled="{canEdit(dataGrid.selectedIndex)}" />
+  <mx:Button id="excluirButton" label="Excluir" click="destroy()"
+      visible="{showDestroy}" includeInLayout="{showDestroy}"
+      enabled="{canDelete(dataGrid.selectedIndex)}" />
+  <mx:Spacer visible="{showReport}"/>
+  <core:ReportButton id="reportButton" 
+    reportPath="{reportPath}"
+    reportType="{reportType}"
+    recordId="{parseInt(RxModel(dataGrid.selectedItem).id)}"
+    enabled="{(canPrint(dataGrid.selectedIndex))}"
+    visible="{(reportPath != '') || (reportType != '')}" 
+    includeInLayout="{(reportPath != '') || (reportType != '')}"/>
+</mx:HBox>
