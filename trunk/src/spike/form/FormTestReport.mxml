@@ -14,6 +14,7 @@
   
 <mx:Script>
   <![CDATA[
+    import org.restfulx.utils.TypedArray;
     import spike.models.ReportTemplate;
     import spike.models.AcFilter;
     import mx.controls.Alert;
@@ -37,8 +38,13 @@
         onSelectFailure, null);      
     }      
     
-      protected function onSelectSuccess(results:Array):void {
-        availableReports = new ModelsCollection(results);
+      protected function onSelectSuccess(results:*):void {
+        if (results is Array) {
+          availableReports = new ModelsCollection(results);
+        }
+        else if (results is TypedArray) {
+          availableReports = new ModelsCollection(results.source);
+        }
       }
       
       protected function onSelectFailure(info:Object):void {

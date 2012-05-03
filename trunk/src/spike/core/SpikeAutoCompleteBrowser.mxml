@@ -14,6 +14,7 @@
 
   <mx:Script>
     <![CDATA[
+      import org.restfulx.utils.TypedArray;
       import org.restfulx.collections.RxCollection;
       import org.restfulx.Rx;
       import mx.events.CloseEvent;
@@ -81,9 +82,15 @@
                                       metadata: searchMetadata });
       }
 
-      protected function onResourceSearch(result:Object):void {
-        if ((result as Array).length)
-          results = new RxCollection(result as Array);
+      protected function onResourceSearch(result:*):void {
+        if (result is Array) {
+          if ((result as Array).length)
+            results = new RxCollection(result as Array);
+        }
+        else if (result is TypedArray) {
+          if ((result as TypedArray).source.length)
+            results = new RxCollection(result.source);
+        }
 
         var dp:ListCollectionView = new ListCollectionView(results.list);
         dp.sort = _dataProvider.sort;

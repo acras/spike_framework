@@ -20,7 +20,7 @@
 
       public function set filter(value: AcFilter): void{
         _filter = value;
-        _targetModel = getDefinitionByName('stockfin.models.' + _filter.targetModel) as Class;
+        _targetModel = getDefinitionByName('sglweb.models.' + _filter.targetModel) as Class;
       }
       
       public function get filter(): AcFilter{

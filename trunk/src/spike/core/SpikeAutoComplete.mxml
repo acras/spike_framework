@@ -30,6 +30,7 @@
 
   <mx:Script>
     <![CDATA[
+      import org.restfulx.utils.TypedArray;
       import mx.binding.utils.BindingUtils;
       import com.hillelcoren.utils.StringUtils;
       import mx.collections.ListCollectionView;
@@ -222,12 +223,20 @@
                                       metadata: searchMetadata } );
       }
 
-      protected function onResourceSearch(result:Object):void {
+      protected function onResourceSearch(result:*):void {
         searching = false;
         searched = true;
+        
+        var r:Array;
+        if (result is Array) {
+          r = result;
+        }
+        else if (result is TypedArray) {
+          r = result.source;
+        }
 
-        if ((result as Array).length)
-          results = new RxCollection(result as Array);
+        if (r.length)
+          results = new RxCollection(r);
         else
           doSearch = true;
 
