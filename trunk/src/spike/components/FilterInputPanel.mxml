@@ -67,7 +67,7 @@
       
       public function onClickFind(event: MouseEvent): void{
         if (checkRequired()){
-          var modelClass: Class = getDefinitionByName('stockfin.models.' + _filterDef.modelClass) as Class;
+          var modelClass: Class = getDefinitionByName('sglweb.models.' + _filterDef.modelClass) as Class;
           Rx.models.reload(modelClass, null, null, null, getParams());
         }
         else
