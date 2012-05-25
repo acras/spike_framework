@@ -9,6 +9,7 @@ package spike.models
      public var name:String;
      public var reportType:String;
      public var controllerName:String;
+     [Lazy]
      [BelongsTo]
      public var acFilterDef: AcFilterDef;
      
