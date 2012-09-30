@@ -18,6 +18,7 @@
                 [ {label:"Hoje", data:"TODAY"}, 
                   {label:"Esta Semana", data:"THIS_WEEK"}, 
                   {label:"Mês Atual", data:"THIS_MONTH"},
+                  {label:"Mês Anterior", data:"PREVIOUS_MONTH"},
                   {label:"Outro Período", data:"OTHER"} ]);
     
       public function set filter(value: AcFilter): void{
@@ -71,6 +72,10 @@
           var firstDayOfMonth:Date = new Date(dt.fullYear, dt.month, 1);
           initialDateField.selectedDate = firstDayOfMonth;
           finalDateField.selectedDate = today;
+        }
+        else if (opcoesPeriodoComboBox.selectedItem.data == 'PREVIOUS_MONTH'){
+          initialDateField.selectedDate = new Date(dt.fullYear, dt.month-1, 1);;
+          finalDateField.selectedDate = new Date(dt.fullYear, dt.month, 0);;
         }
         else if (opcoesPeriodoComboBox.selectedItem.data == 'OTHER'){
           initialDateField.selectedDate = null;
