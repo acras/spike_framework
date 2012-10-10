@@ -78,6 +78,8 @@
       public var reportPath:String = '';
       [Bindable]
       public var reportType:String = '';
+      [Bindable]
+      public var reloadModel: Boolean = false;
       
       protected function setDataProviderGrid():void {
         if (grid) {
@@ -248,8 +250,12 @@
         if (grid) {
           if (classGrid(grid).selectedIndex >= 0) {
             model = modelClass(RxUtils.clone(classGrid(grid).selectedItem, true));
-            resource = getEditResourcePath();
-            moduleLoader.loadModule();
+            if (reloadModel) {
+              model.reload(openForm);
+            } else {
+              resource = getEditResourcePath();
+              moduleLoader.loadModule();
+            }
           }
         }
       }
@@ -286,6 +292,13 @@
         var errors:Array = Utils.getErrors(info);
         Alert.show(errors.join("\n"), 'Erro ao excluir registro.');
       }
+      
+      private function openForm(obj: Object): void {
+        model = obj;
+        resource = getEditResourcePath();
+        moduleLoader.loadModule();        
+      } 
+      
     ]]>
   </mx:Script>
   
