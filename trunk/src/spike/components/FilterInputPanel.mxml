@@ -77,9 +77,11 @@
       protected function buildFilterDefPanel(filterDef: AcFilterDef): void{
         filtersVBox.removeAllChildren();
         var filter: AcFilter;
-        for each(filter in _filterDef.acFilters)
-          if (filter.queryUser)
-            buildFilter(filter);
+        if (_filterDef != null)
+          if (_filterDef.acFilters != null)
+            for each(filter in _filterDef.acFilters)
+              if (filter.queryUser)
+                buildFilter(filter);
       }  
       
       protected function buildFilter(filter: AcFilter): void{
