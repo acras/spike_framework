@@ -89,7 +89,7 @@
           buildTextFilter(filter);
         if (filter.dataType == 'date')
           buildDateFilter(filter);
-        if (filter.dataType == 'period')
+        if (filter.dataType == 'period' || filter.dataType == 'timezone_period')
           buildPeriodFilter(filter);
         if (filter.dataType == 'autocomplete')
           buildAutocompleteFilter(filter);
