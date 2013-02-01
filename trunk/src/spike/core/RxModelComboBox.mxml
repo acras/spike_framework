@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:ComboBox xmlns:mx="http://www.adobe.com/2006/mxml"
+    rowCount="10">
+
+  <mx:Script>
+    <![CDATA[
+      import org.restfulx.models.RxModel;
+      import mx.events.ListEvent;
+
+      private var selectedValue_:RxModel;
+      private var selectedValueSet_:Boolean = false;
+      private var dataProviderSet_:Boolean = false;
+
+      override protected function commitProperties():void {
+        super.commitProperties();
+        if (selectedValueSet_ && dataProviderSet_) {
+          selectedValueSet_ = false;
+          if (selectedValue_ == null) {
+            this.selectedIndex = -1;
+          }
+          for (var i:int = 0; i < this.dataProvider.length; i++) {
+            var item:RxModel = this.dataProvider[i];
+            if(selectedValue_ != null && item.id == selectedValue_.id) {
+              this.selectedIndex = i;
+              break;
+            }
+          }
+        }
+      }
+
+      override public function set dataProvider(o:Object):void {
+        super.dataProvider = o;
+        if (o != null && o.length)
+          dataProviderSet_ = true;
+      }
+
+      public function set selectedValue(s:RxModel):void {
+        selectedValueSet_ = true;
+        selectedValue_ = s;
+        invalidateProperties();
+      }
+    [Bindable]
+      public function get selectedValue():RxModel {
+        if (this.selectedIndex >= 0 && this.dataProvider.length > this.selectedIndex) {
+          return this.dataProvider[this.selectedIndex];
+        }
+        return null;
+      }
+    ]]>
+  </mx:Script>
+</mx:ComboBox>

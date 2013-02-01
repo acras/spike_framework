@@ -1,67 +1,67 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <flexLibProperties version="1">
-<includeClasses>
-<classEntry path="spike.components.PrintReportPanel"/>
-<classEntry path="spike.formatters.DataBRFormatter"/>
-<classEntry path="spike.form.FormGenerateReport"/>
-<classEntry path="spike.models.ReportTemplate"/>
-<classEntry path="spike.core.SpikeVBox"/>
-<classEntry path="spike.core.DocumentoInput"/>
-<classEntry path="spike.core.SpikeDataGrid"/>
-<classEntry path="spike.form.FormModule"/>
-<classEntry path="spike.index.IndexHDividedBox"/>
-<classEntry path="spike.events.ChildReadyEvent"/>
-<classEntry path="spike.index.IndexModule"/>
-<classEntry path="spike.index.IndexAdvancedDataGrid"/>
-<classEntry path="spike.core.SpikeUfComboBox"/>
-<classEntry path="spike.core.SpikeDateField"/>
-<classEntry path="spike.core.DateTimeField"/>
-<classEntry path="spike.formatters.BRLFormatter"/>
-<classEntry path="spike.core.ISpikeAutoCompleteBrowser"/>
-<classEntry path="spike.models.AcFilterDef"/>
-<classEntry path="spike.events.AfterFormSaveEvent"/>
-<classEntry path="spike.form.FormControlBar"/>
-<classEntry path="spike.models.AcFilter"/>
-<classEntry path="spike.core.CEPInput"/>
-<classEntry path="spike.core.DateTimeChooser"/>
-<classEntry path="spike.core.SpikeModuleLoader"/>
-<classEntry path="spike.events.AfterFormCreateEvent"/>
-<classEntry path="spike.form.FormModule2"/>
-<classEntry path="spike.components.FilterAutoCompleteInput"/>
-<classEntry path="spike.components.FilterInputPanel"/>
-<classEntry path="spike.events.AfterFormUpdateEvent"/>
-<classEntry path="spike.index.IndexOperationsBox"/>
-<classEntry path="spike.components.FilterTextInput"/>
-<classEntry path="spike.models.AcFilterOption"/>
-<classEntry path="spike.core.SpikeComboBox"/>
-<classEntry path="spike.core.Utils"/>
-<classEntry path="spike.core.IConv"/>
-<classEntry path="spike.form.FormTestReport"/>
-<classEntry path="spike.core.TelefoneInput"/>
-<classEntry path="spike.core.SpikeHelpTip"/>
-<classEntry path="spike.core.CPFInput"/>
-<classEntry path="spike.core.SpikeAdvancedDataGrid"/>
-<classEntry path="spike.core.SpikeServiceErrorValidator"/>
-<classEntry path="spike.core.SpikeTimeField"/>
-<classEntry path="spike.components.FilterOptionsInput"/>
-<classEntry path="spike.core.ReportButton"/>
-<classEntry path="spike.index.IndexSearchBox"/>
-<classEntry path="spike.components.IRenderedFilter"/>
-<classEntry path="spike.core.SpikeDecimalInput"/>
-<classEntry path="spike.core.AutoScroll"/>
-<classEntry path="spike.form.FormTestFilter"/>
-<classEntry path="spike.core.CNPJInput"/>
-<classEntry path="spike.core.SpikeAutoComplete"/>
-<classEntry path="spike.form.FormErrorPanel"/>
-<classEntry path="spike.core.SpikeTextArea"/>
-<classEntry path="spike.core.ErrorTipManager"/>
-<classEntry path="spike.core.SpikeAutoCompleteBrowser"/>
-<classEntry path="spike.core.SpikeFileDownloader"/>
-<classEntry path="spike.index.IndexDataGrid"/>
-<classEntry path="spike.form.IFormModule"/>
-</includeClasses>
-<includeResources>
-<resourceEntry destPath="assets/help.png" sourcePath="assets/help.png"/>
-</includeResources>
-<namespaceManifests/>
+  <includeClasses>
+    <classEntry path="spike.formatters.DataBRFormatter"/>
+    <classEntry path="spike.form.FormModule"/>
+    <classEntry path="spike.components.FilterOptionsInput"/>
+    <classEntry path="spike.core.ReportButton"/>
+    <classEntry path="spike.core.SpikeUfComboBox"/>
+    <classEntry path="spike.core.SpikeHelpTip"/>
+    <classEntry path="spike.core.DateTimeChooser"/>
+    <classEntry path="spike.models.AcFilterOption"/>
+    <classEntry path="spike.core.SpikeServiceErrorValidator"/>
+    <classEntry path="spike.index.IndexSearchBox"/>
+    <classEntry path="spike.core.SpikeDecimalInput"/>
+    <classEntry path="spike.form.FormTestReport"/>
+    <classEntry path="spike.form.FormControlBar"/>
+    <classEntry path="spike.core.SpikeAutoComplete"/>
+    <classEntry path="spike.core.Utils"/>
+    <classEntry path="spike.core.TelefoneInput"/>
+    <classEntry path="spike.core.ErrorTipManager"/>
+    <classEntry path="spike.core.DocumentoInput"/>
+    <classEntry path="spike.index.IndexAdvancedDataGrid"/>
+    <classEntry path="spike.form.FormGenerateReport"/>
+    <classEntry path="spike.core.CEPInput"/>
+    <classEntry path="spike.index.IndexModule"/>
+    <classEntry path="spike.events.AfterFormUpdateEvent"/>
+    <classEntry path="spike.models.ReportTemplate"/>
+    <classEntry path="spike.components.FilterTextInput"/>
+    <classEntry path="spike.core.SpikeDataGrid"/>
+    <classEntry path="spike.form.FormErrorPanel"/>
+    <classEntry path="spike.core.SpikeModuleLoader"/>
+    <classEntry path="spike.index.IndexDataGrid"/>
+    <classEntry path="spike.core.SpikeVBox"/>
+    <classEntry path="spike.core.CPFInput"/>
+    <classEntry path="spike.form.FormModule2"/>
+    <classEntry path="spike.core.SpikeComboBox"/>
+    <classEntry path="spike.components.PrintReportPanel"/>
+    <classEntry path="spike.core.SpikeTextArea"/>
+    <classEntry path="spike.form.IFormModule"/>
+    <classEntry path="spike.form.FormTestFilter"/>
+    <classEntry path="spike.models.AcFilter"/>
+    <classEntry path="spike.core.SpikeFileDownloader"/>
+    <classEntry path="spike.core.IConv"/>
+    <classEntry path="spike.components.IRenderedFilter"/>
+    <classEntry path="spike.core.ISpikeAutoCompleteBrowser"/>
+    <classEntry path="spike.events.AfterFormSaveEvent"/>
+    <classEntry path="spike.core.AutoScroll"/>
+    <classEntry path="spike.core.CNPJInput"/>
+    <classEntry path="spike.formatters.BRLFormatter"/>
+    <classEntry path="spike.core.SpikeTimeField"/>
+    <classEntry path="spike.index.IndexOperationsBox"/>
+    <classEntry path="spike.index.IndexHDividedBox"/>
+    <classEntry path="spike.events.ChildReadyEvent"/>
+    <classEntry path="spike.core.SpikeAdvancedDataGrid"/>
+    <classEntry path="spike.events.AfterFormCreateEvent"/>
+    <classEntry path="spike.core.SpikeDateField"/>
+    <classEntry path="spike.components.FilterInputPanel"/>
+    <classEntry path="spike.models.AcFilterDef"/>
+    <classEntry path="spike.core.DateTimeField"/>
+    <classEntry path="spike.core.SpikeAutoCompleteBrowser"/>
+    <classEntry path="spike.components.FilterAutoCompleteInput"/>
+  </includeClasses>
+  <includeResources>
+    <resourceEntry destPath="assets/help.png" sourcePath="assets/help.png"/>
+  </includeResources>
+  <namespaceManifests/>
 </flexLibProperties>

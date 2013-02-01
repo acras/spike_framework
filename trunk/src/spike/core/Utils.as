@@ -52,6 +52,9 @@ package spike.core {
       else if (component is TextInput)
         value = TextInput(component).text;
 
+      else if (component is RxModelComboBox)
+        value = RxModelComboBox(component).selectedValue;
+
       else
         value = null;
 
