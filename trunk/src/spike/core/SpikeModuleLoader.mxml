@@ -70,11 +70,22 @@
         info.addEventListener(ModuleEvent.READY, onReady);
         info.addEventListener(ModuleEvent.ERROR, onError);
         info.addEventListener(ModuleEvent.UNLOAD, onUnload);
-
-        if (child)
-          removeChild(child);
+  
+        if (child) {
+          try {
+            removeChild(child);
+          }
+          catch (e:Error) { trace(e) } /* pode acontecer se foi criado um popup para child */
+        } 
+              
         showPopUp();
         info.load(ApplicationDomain.currentDomain);
+      }
+      
+      public function getAndRemoveChild():DisplayObject {
+        var d:DisplayObject = child;
+        child = null;
+        return d;
       }
 
       public function unloadModule():void {
