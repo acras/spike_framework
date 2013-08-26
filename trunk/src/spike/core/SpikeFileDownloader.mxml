@@ -49,7 +49,11 @@
           request.data = data;
           request.method = URLRequestMethod.GET;
           if (bypassToBrowser) {
-            navigateToURL(request, frameName);
+            //navigateToURL(request, frameName); // da pau no chrome
+            if (data) {
+              url += '?'+data;
+            }
+            ExternalInterface.call('downloadURL', url);
           } else {
             fileReference = new FileReference();
 
