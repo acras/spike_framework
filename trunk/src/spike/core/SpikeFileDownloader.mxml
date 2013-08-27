@@ -5,6 +5,7 @@
 
   <mx:Script>
     <![CDATA[
+      import mx.logging.Log;
       import org.restfulx.services.http.XMLHTTPServiceProvider;
       import org.restfulx.serializers.GenericSerializer;
       import org.restfulx.controllers.SerializersController;
@@ -48,12 +49,17 @@
           var request:URLRequest = new URLRequest(url);
           request.data = data;
           request.method = URLRequestMethod.GET;
+          var v: String = ExternalInterface.call("function(){return navigator.appVersion+'-'+navigator.appName;}");
+          var chrome29:Boolean = v.indexOf('Chrome/29') >= 0;
           if (bypassToBrowser) {
-            //navigateToURL(request, frameName); // da pau no chrome
-            if (data) {
-              url += '?'+data;
+            if (chrome29){
+              if (data) {
+                url += '?'+data;
+              }
+              ExternalInterface.call('downloadURL', url);
             }
-            ExternalInterface.call('downloadURL', url);
+            else
+              navigateToURL(request, frameName); // da pau no chrome29
           } else {
             fileReference = new FileReference();
 
