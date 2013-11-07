@@ -76,7 +76,7 @@ package spike.core {
 
     public static function getErrors(info:Object):Array {
       if (info is XMLServiceErrors) {
-        var validationResults:Array = info.getFieldErrors(Rx.DEFAULT_ERROR_FIELD);
+        var validationResults:Array = info.getFieldErrors("base");
         return  validationResults.map(function(item:ValidationResult, index:int, array:Array):String {
                   return item.errorMessage;
                 });
