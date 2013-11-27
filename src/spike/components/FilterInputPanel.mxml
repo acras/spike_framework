@@ -19,6 +19,8 @@
       
       [Bindable]
       public var results: ModelsCollection;
+      [Bindable]
+      public var allowCsv:Boolean = false;
 
       public function set filterDef(value: AcFilterDef): void{
         _filterDef = value;
@@ -65,7 +67,7 @@
         return result;
       }
       
-      public function onClickFind(event: MouseEvent): void{
+      public function onClickFind(event: MouseEvent,format:String = 'pdf'): void{
         if (checkRequired()){
           var modelClass: Class = getDefinitionByName('sglweb.models.' + _filterDef.modelClass) as Class;
           Rx.models.reload(modelClass, null, null, null, getParams());
@@ -139,7 +141,12 @@
   </mx:Script>
   
   <mx:VBox id="filtersVBox" />
-  <mx:Button label="Buscar" click="onClickFind(event)" />
+  <mx:HBox>
+    <mx:Button label="Buscar" click="onClickFind(event, 'pdf')" visible="{!allowCsv}"/>
+    <mx:Button label="Baixar em PDF" click="onClickFind(event, 'pdf')" visible="{allowCsv}"/>
+    <mx:Button label="Baixar em CSV" click="onClickFind(event, 'csv')" visible="{allowCsv}"/>
+  </mx:HBox>
+  
   
   
 </mx:VBox>

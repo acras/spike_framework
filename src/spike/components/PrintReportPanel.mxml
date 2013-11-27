@@ -13,7 +13,7 @@
         filterDef = _report.acFilterDef;
       }
       
-      override public function onClickFind(event: MouseEvent): void{
+      override public function onClickFind(event: MouseEvent, format:String = 'pdf'): void{
         if (checkRequired()){
           var pdfDownloader: SpikeFileDownloader = new SpikeFileDownloader();
           
@@ -24,7 +24,7 @@
             
           pdfDownloader.frameName = '_self';
           pdfDownloader.fileName = 'report.pdf';
-          pdfDownloader.data = 'report_template_id=' + _report.id.toString() + '&' + getParamsAsString();
+          pdfDownloader.data = 'report_template_id=' + _report.id.toString() + '&' + getParamsAsString()+"format="+format;
           pdfDownloader.download();
         }
         else
