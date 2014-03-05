@@ -79,6 +79,9 @@
       public var reportPath:String = '';
       [Bindable]
       public var reportType:String = '';
+      [Bindable]
+      public var useLimit:Boolean = false;
+      public var limit = 100;
       
       protected function setDataProviderGrid():void {
         if (grid) {
@@ -215,6 +218,10 @@
         }
         else if (results is TypedArray) {
           records = new ModelsCollection(results.source);
+        }
+        if (useLimit && records.length == limit + 1) {
+          records.removeItemAt(records.length - 1);
+          Alert.show("Sua busca retornou muitos resultados e será exibido apenas as 100 primeiras ocorrências. Por favor reveja o filtro de sua busca.");
         }
         
         if (grid)
