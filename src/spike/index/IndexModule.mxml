@@ -153,11 +153,20 @@
       
       protected function onDoubleClickGrid(e: Event): void{
         if (operationsBox is IndexOperationsBox){
-          if ((operationsBox as IndexOperationsBox).canEdit(dataGrid.selectedIndex))
-            edit();
+          if(advancedDataGrid) {
+            if ((operationsBox as IndexOperationsBox).canEdit(advancedDataGrid.selectedIndex)) edit();
+          }
+          else {
+            if ((operationsBox as IndexOperationsBox).canEdit(dataGrid.selectedIndex)) edit();
+          }
         } else {
-          if (dataGrid.selectedIndex > 0)
-            edit();
+          if(advancedDataGrid) {
+            if (advancedDataGrid.selectedIndex > 0) edit();
+          }
+          else {
+           if (dataGrid.selectedIndex > 0) edit(); 
+          }
+          
         }
       }      
       
