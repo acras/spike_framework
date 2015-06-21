@@ -99,12 +99,12 @@
       <mx:RemoveChild target="{editarButton}"/>
       <mx:RemoveChild target="{excluirButton}"/>
       <mx:AddChild relativeTo="{this}" position="lastChild">
-        <mx:Button id="editarButtonAdvanced" label="Editar" click="edit()"
+        <mx:Button id="editarButtonAdvanced" label="{resourceManager.getString('common', 'editar')}" click="edit()"
           visible="{showEdit}" includeInLayout="{showEdit}"
           enabled="{canEdit(advancedDataGrid.selectedIndex)}" />      	
       </mx:AddChild>
       <mx:AddChild relativeTo="{this}" position="lastChild">
-        <mx:Button id="excluirButtonAdvanced" label="Excluir" click="destroy()"
+        <mx:Button id="excluirButtonAdvanced" label="{resourceManager.getString('common', 'excluir')}" click="destroy()"
           visible="{showDestroy}" includeInLayout="{showDestroy}"
           enabled="{canDelete(advancedDataGrid.selectedIndex)}" />      	
       </mx:AddChild>
@@ -113,13 +113,13 @@
   </mx:states>
 
 
-  <mx:Button id="novoButton" label="Novo" click="add()"
+  <mx:Button id="novoButton" label="{resourceManager.getString('common', 'novo')}" click="add()"
       visible="{showAdd}" includeInLayout="{showAdd}"
       enabled="{canAdd()}" />
-  <mx:Button id="editarButton" label="Editar" click="edit()"
+  <mx:Button id="editarButton" label="{resourceManager.getString('common', 'editar')}" click="edit()"
       visible="{showEdit}" includeInLayout="{showEdit}"
       enabled="{canEdit(dataGrid.selectedIndex)}" />
-  <mx:Button id="excluirButton" label="Excluir" click="destroy()"
+  <mx:Button id="excluirButton" label="{resourceManager.getString('common', 'excluir')}" click="destroy()"
       visible="{showDestroy}" includeInLayout="{showDestroy}"
       enabled="{canDelete(dataGrid.selectedIndex)}" />
   <mx:Spacer visible="{showReport}"/>

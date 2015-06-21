@@ -30,6 +30,7 @@
 
   <mx:Script>
     <![CDATA[
+      import mx.resources.ResourceManager;
       import org.restfulx.utils.TypedArray;
       import mx.binding.utils.BindingUtils;
       import com.hillelcoren.utils.StringUtils;
@@ -113,8 +114,8 @@
       }
 
       protected function onInitialize(event:FlexEvent):void {
-        var c:String = (this.lookupMinChars == 1 ? " caracter " : " caracteres ");
-        var s:String = "Digite no mínimo " + this.lookupMinChars.toString() + c;
+        var c:String = (this.lookupMinChars == 1 ? " "+ResourceManager.getInstance().getString('common', 'caracter')+" " : " "+ResourceManager.getInstance().getString('common', 'caracteres')+" ");
+        var s:String = ResourceManager.getInstance().getString('common', 'digite_no_minimo') + this.lookupMinChars.toString() + c;
         if (this.searchFieldsDescription != null && this.searchFieldsDescription != "")
           s += " (" + this.searchFieldsDescription + ")";
         this.prompt = s;

@@ -13,6 +13,10 @@
     height="100%" width="100%"
     top="0" right="0" bottom="0" left="0"
     creationComplete="onCreationComplete(event)">
+    
+  <mx:Metadata>
+  [ResourceBundle("common")]
+  </mx:Metadata>
 
   <mx:Script>
     <![CDATA[
@@ -278,7 +282,7 @@
       }
 
       protected function destroy():void {
-      	Alert.show("Tem certeza?", "Apagar registro", Alert.NO|Alert.YES, this, alertDestroyHandler,null,Alert.NO );
+      	Alert.show(resourceManager.getString('common', 'tem_certeza'), resourceManager.getString('common', 'apagar_registro'), Alert.NO|Alert.YES, this, alertDestroyHandler,null,Alert.NO );
       }
 
       protected function onBeforeDestroy():void {
@@ -315,7 +319,7 @@
   <mx:states>
   	<mx:State name="adicionaTotalRegistros">
   	     <mx:AddChild relativeTo="{mainPanel}" position="lastChild">
-  	         <mx:Label text="{records.length} registro(s) encontrado(s)."/>
+  	         <mx:Label text="{records.length} {resourceManager.getString('common', 'registros_encontrados')}"/>
   	     </mx:AddChild>
   	</mx:State>
   </mx:states>

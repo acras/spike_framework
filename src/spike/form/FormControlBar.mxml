@@ -2,6 +2,11 @@
 <mx:ControlBar
     xmlns:mx="http://www.adobe.com/2006/mxml"
     width="100%">
+    
+    
+  <mx:Metadata>
+  [ResourceBundle("common")]
+  </mx:Metadata>
 
   <mx:Script>
     <![CDATA[
@@ -14,7 +19,7 @@
     ]]>
   </mx:Script>
 
-  <mx:Button id="saveButton" label="Salvar" click="save()"/>
+  <mx:Button id="saveButton" label="{resourceManager.getString('common', 'salvar')}" click="save()"/>
   <mx:Button id="saveAndContinueButton" label="Salvar e continuar" click="saveAndContinue()" visible="false" includeInLayout="false"/>
-  <mx:Button id="cancelButton" label="Cancelar" click="close()"/>
+  <mx:Button id="cancelButton" label="{resourceManager.getString('common', 'cancelar')}" click="close()"/>
 </mx:ControlBar>

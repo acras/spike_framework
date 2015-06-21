@@ -7,6 +7,7 @@
 
   <mx:Script>
     <![CDATA[
+      import mx.resources.ResourceManager;
       import mx.core.Container;
       import mx.core.UIComponent;
       import mx.controls.Button;
@@ -14,7 +15,7 @@
       [Bindable]
       public var index:Function;
       [Bindable]
-      public var buttonLabel:String = 'Procurar';
+      public var buttonLabel:String = ResourceManager.getInstance().getString('common', 'procurar');
       [Bindable]
       public var setFocusOn:UIComponent;
 
