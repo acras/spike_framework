@@ -22,6 +22,7 @@
           { label: "Amazonas", data: "AM" },
           { label: "Bahia", data: "BA" },
           { label: "Ceará", data: "CE" },
+          { label: "Distrito Federal", data: "DF" },
           { label: "Espírito Santo", data: "ES" },
           { label: "Goiás", data: "GO" },
           { label: "Maranhão", data: "MA" },
